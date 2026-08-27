@@ -1,0 +1,15 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": "nextjs",
+  "functions": {
+    "app/api/detect/route.ts": { "maxDuration": 300 },
+    "app/api/evaluate/route.ts": { "maxDuration": 300 },
+    "app/api/demo/[scenario]/route.ts": { "maxDuration": 120 }
+  },
+  "env": {
+    "SENTINEL_MODE": "DETECT_ONLY",
+    "DATABASE_URL": "pglite://:memory:",
+    "LLM_PROVIDER": "none",
+    "LOG_LEVEL": "warn"
+  }
+}

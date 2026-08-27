@@ -1,0 +1,364 @@
+@import "tailwindcss";
+
+/*
+ * SPIDER-VERSE — THE WEB IS THE DATA STRUCTURE
+ *
+ * The theme is chosen because it IS the subject. This product is a graph:
+ * strands between accounts, nodes that hold a cluster together, the same actor
+ * appearing as several variants. Halftone print, chromatic offset and the
+ * magenta/cyan pair are the visual language of exactly that idea.
+ *
+ * Colour carries state and nothing else. A reader learns four things once:
+ *
+ *   MAGENTA  coordination indicated — the strand that matters
+ *   CYAN     structural link, observed
+ *   AMBER    possible coordination, or a signal below threshold
+ *   VIOLET   the detector declined to decide — a human has it
+ *
+ * The costume stops at the chrome. Tables, numbers and evidence panels are
+ * high-contrast and dense, because the output of this system is a decision to
+ * investigate real people and it has to be readable under scrutiny. The
+ * specification explicitly rules out neon-hacker theatre and giant FRAUD
+ * banners; nothing here does either. There is no red, and no word for guilt.
+ */
+
+@theme {
+  --color-web-void: #05060d;
+  --color-web-base: #090b16;
+  --color-web-panel: #10131f;
+  --color-web-raised: #171b2b;
+  --color-web-line: #232840;
+  --color-web-line-bright: #3a4166;
+
+  --color-chalk: #e8eaf5;
+  --color-chalk-dim: #9298b8;
+  --color-chalk-faint: #626884;
+
+  --color-strand: #ff2d92;
+  --color-strand-deep: #b8005f;
+  --color-strand-glow: #ff6ab5;
+
+  --color-node: #22d3ee;
+  --color-node-deep: #0e7490;
+
+  --color-state-likely: #ff2d92;
+  --color-state-possible: #fbbf24;
+  --color-state-clear: #34d399;
+  --color-state-unknown: #a78bfa;
+
+  --font-web: var(--font-space-grotesk), ui-sans-serif, system-ui, sans-serif;
+  --font-strand: var(--font-mono-web), ui-monospace, "SF Mono", Menlo, monospace;
+}
+
+:root {
+  color-scheme: dark;
+}
+
+html {
+  background: var(--color-web-void);
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--color-web-void);
+  color: var(--color-chalk);
+  font-family: var(--font-web);
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+::selection {
+  background: var(--color-strand);
+  color: #fff;
+}
+
+/* ---------------------------------------------------------------------- */
+/* Surfaces                                                               */
+/* ---------------------------------------------------------------------- */
+
+.web-panel {
+  background: linear-gradient(
+    165deg,
+    color-mix(in oklab, var(--color-web-panel) 93%, white 7%),
+    var(--color-web-panel)
+  );
+  border: 1px solid var(--color-web-line);
+  position: relative;
+}
+
+.web-clip {
+  clip-path: polygon(12px 0, 100% 0, 100% calc(100% - 12px), calc(100% - 12px) 100%, 0 100%, 0 12px);
+}
+
+.web-strand {
+  font-family: var(--font-strand);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
+}
+
+.web-label {
+  font-family: var(--font-strand);
+  font-size: 0.6875rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--color-chalk-faint);
+}
+
+.web-stamp {
+  font-family: var(--font-strand);
+  font-size: 0.625rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  border: 1px solid currentColor;
+  padding: 0.1rem 0.4rem;
+  display: inline-block;
+  white-space: nowrap;
+}
+
+/* Chromatic offset on a heading — the Spider-Verse print artefact, done in
+   two text-shadows rather than three stacked DOM nodes. */
+.web-offset {
+  text-shadow:
+    2px 0 0 color-mix(in oklab, var(--color-node) 55%, transparent),
+    -2px 0 0 color-mix(in oklab, var(--color-strand) 55%, transparent);
+}
+
+.web-rule {
+  position: relative;
+}
+.web-rule::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -6px;
+  width: 48px;
+  height: 2px;
+  background: linear-gradient(90deg, var(--color-strand), var(--color-node));
+}
+
+/* ---------------------------------------------------------------------- */
+/* Halftone                                                               */
+/* ---------------------------------------------------------------------- */
+
+/*
+ * Everything below is CSS gradients and transforms. No image, no video, no
+ * WebGL, no third-party request. A product arguing for auditability should not
+ * need a CDN to draw its own landing page.
+ */
+
+.halftone {
+  background-image:
+    radial-gradient(circle at center, color-mix(in oklab, var(--color-strand) 60%, transparent) 1px, transparent 1.7px),
+    radial-gradient(circle at center, color-mix(in oklab, var(--color-node) 40%, transparent) 1px, transparent 1.7px);
+  background-size: 13px 13px, 19px 19px;
+  background-position: 0 0, 6px 9px;
+}
+
+@keyframes halftone-drift {
+  from {
+    background-position: 0 0, 6px 9px;
+  }
+  to {
+    background-position: 26px 39px, 44px 47px;
+  }
+}
+
+.halftone-drift {
+  animation: halftone-drift 18s linear infinite;
+}
+
+@keyframes strand-draw {
+  from {
+    stroke-dashoffset: var(--strand-length, 300);
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+.strand-draw {
+  stroke-dasharray: var(--strand-length, 300);
+  animation: strand-draw var(--strand-dur, 1.6s) cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation-delay: var(--strand-delay, 0s);
+}
+
+@keyframes node-pop {
+  0% {
+    transform: scale(0);
+    opacity: 0;
+  }
+  70% {
+    transform: scale(1.25);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.node-pop {
+  animation: node-pop 0.5s cubic-bezier(0.22, 1.4, 0.36, 1) both;
+  animation-delay: var(--node-delay, 0s);
+  transform-origin: center;
+}
+
+@keyframes pulse-strand {
+  0%,
+  100% {
+    opacity: 0.45;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+.pulse-strand {
+  animation: pulse-strand 2.6s ease-in-out infinite;
+}
+
+@keyframes marquee-slide {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.marquee-track {
+  animation: marquee-slide 36s linear infinite;
+}
+
+/* ---------------------------------------------------------------------- */
+/* Data surfaces — legibility is not negotiable                           */
+/* ---------------------------------------------------------------------- */
+
+.web-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.8125rem;
+}
+
+.web-table thead th {
+  font-family: var(--font-strand);
+  font-size: 0.625rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-chalk-faint);
+  text-align: left;
+  padding: 0.55rem 0.75rem;
+  border-bottom: 1px solid var(--color-web-line);
+  white-space: nowrap;
+}
+
+.web-table tbody td {
+  padding: 0.6rem 0.75rem;
+  border-bottom: 1px solid color-mix(in oklab, var(--color-web-line) 60%, transparent);
+  vertical-align: top;
+}
+
+.web-table tbody tr:hover {
+  background: color-mix(in oklab, var(--color-strand) 6%, transparent);
+}
+
+.web-bar {
+  height: 5px;
+  background: var(--color-web-raised);
+  overflow: hidden;
+}
+.web-bar > span {
+  display: block;
+  height: 100%;
+}
+
+/* Signal bar: a filled portion of a fixed maximum, so the reader sees both the
+   points scored and the points available. */
+.signal-bar {
+  height: 8px;
+  background: var(--color-web-raised);
+  position: relative;
+  overflow: hidden;
+}
+.signal-bar > span {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, var(--color-strand-deep), var(--color-strand));
+}
+
+:where(a, button, input, select, textarea, [tabindex]):focus-visible {
+  outline: 2px solid var(--color-node);
+  outline-offset: 2px;
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-web-line-bright) transparent;
+}
+*::-webkit-scrollbar {
+  height: 9px;
+  width: 9px;
+}
+*::-webkit-scrollbar-thumb {
+  background: var(--color-web-line-bright);
+}
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* ---------------------------------------------------------------------- */
+/* Graph canvas                                                           */
+/* ---------------------------------------------------------------------- */
+
+.graph-node {
+  cursor: pointer;
+  transition: r 120ms ease, stroke-width 120ms ease;
+}
+.graph-node:hover {
+  stroke-width: 3;
+}
+
+.graph-edge {
+  transition: stroke-opacity 120ms ease, stroke-width 120ms ease;
+}
+.graph-edge:hover {
+  stroke-width: 3;
+  stroke-opacity: 1;
+}
+
+/* A derived edge is drawn dashed, everywhere, without exception: it is an
+   inference this system drew rather than something an event asserted, and the
+   two must never look the same. */
+.edge-derived {
+  stroke-dasharray: 5 4;
+}
+
+/* ---------------------------------------------------------------------- */
+/* Reduced motion                                                         */
+/* ---------------------------------------------------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  .halftone-drift,
+  .strand-draw,
+  .node-pop,
+  .pulse-strand,
+  .marquee-track {
+    animation: none !important;
+  }
+  /* End states must remain the visible ones, or content disappears. */
+  .strand-draw {
+    stroke-dashoffset: 0;
+  }
+  .node-pop {
+    transform: none;
+    opacity: 1;
+  }
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+  }
+}

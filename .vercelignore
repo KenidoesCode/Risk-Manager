@@ -1,0 +1,7 @@
+# Local PGlite data directory. On Vercel the database runs in memory, so
+# shipping a local data directory would upload megabytes that are never read.
+.data/
+.next/
+node_modules/
+coverage/
+tests/
