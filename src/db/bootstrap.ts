@@ -42,11 +42,31 @@ export async function ensureBootstrapped(): Promise<void> {
     const { buildGraph } = await import("../graph/builder");
     const build = await buildGraph(db, { correlationId: "bootstrap" });
 
+    // Detection runs here too, and on a memory-backed instance it has to.
+    //
+    // A serverless instance holds its database for the life of one invocation,
+    // so a detection run triggered by a button click is gone before the next
+    // request reads the cluster list. The console then shows an empty ring list
+    // on a corpus that provably contains rings — which reads as "we looked and
+    // found nothing", the single most misleading thing this product could say.
+    //
+    // The explainer is skipped: it is the slow, optional, model-backed step,
+    // and a cold start that spends thirty seconds on prose is a request that
+    // times out. Every ring is still detected, scored and explainable from its
+    // deterministic signals.
+    const { runDetection } = await import("../detection/engine");
+    const detection = await runDetection(db, {
+      correlationId: "bootstrap",
+      rebuild: false,
+      skipExplainer: true,
+    });
+
     logger.info("bootstrap_complete", {
       durationMs: Date.now() - started,
       accounts: summary.accounts,
       entities: summary.entities,
       derivedEdges: build.derivedEdges,
+      clusters: detection.clusters.length,
       inMemory: getEnv().pgliteInMemory,
     });
   })().catch((error: unknown) => {
