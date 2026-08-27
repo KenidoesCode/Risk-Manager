@@ -1,4 +1,4 @@
-import { eq, inArray } from "drizzle-orm";
+import { eq, inArray, sql } from "drizzle-orm";
 
 import type { Database } from "../db/client";
 import {
@@ -33,6 +33,7 @@ import {
 import { recordAudit } from "../audit/service";
 import { scanMetadata } from "../safety/boundary";
 import { getEnv } from "../shared/env";
+import { hashPayload } from "../shared/hash";
 import { newId } from "../shared/ids";
 import { logger } from "../shared/logger";
 
@@ -208,7 +209,20 @@ export async function runDetection(
       injectionFindings: injectionFindings.length,
     });
 
-    const clusterId = newId("clu");
+    // A cluster's identity IS its membership.
+    //
+    // These ids used to come from `newId`, which mixes in a timestamp and
+    // random bytes. That made every detection run produce different ids for the
+    // same ring, which is wrong on its own terms — the same set of accounts,
+    // found by the same method, is the same finding — and it broke the deployed
+    // console outright: a memory-backed serverless instance re-detects on every
+    // cold start, so a link to a cluster produced by one request resolved to
+    // nothing in the next.
+    //
+    // Hashing the sorted members with the method makes the id reproducible from
+    // the data. A link keeps working, two runs over unchanged data agree, and a
+    // ring that gains or loses an account is correctly a different finding.
+    const clusterId = `clu_${hashPayload({ method, members: [...cluster.members].sort() }).slice(0, 20)}`;
 
     // Deterministic explanation ALWAYS, before the model is consulted. The
     // model is an upgrade to a working output, never a dependency of one.
@@ -347,14 +361,45 @@ async function persistDetection(
     correlationId,
   }));
 
+  // Upsert, because a cluster id is now derived from its membership.
+  //
+  // Re-running detection over unchanged data legitimately produces the same
+  // rings with the same ids, and that must not be an error — it is the whole
+  // point of a stable identifier. The latest run's scores win; the ring keeps
+  // the identity a reviewer has been looking at and any link to it survives.
   for (let i = 0; i < clusterRows.length; i += 100) {
     const chunk = clusterRows.slice(i, i + 100);
-    if (chunk.length > 0) await db.insert(clusters).values(chunk);
+    if (chunk.length === 0) continue;
+    await db
+      .insert(clusters)
+      .values(chunk)
+      .onConflictDoUpdate({
+        target: clusters.id,
+        set: {
+          detectionRunId: sql`excluded.detection_run_id`,
+          accountCount: sql`excluded.account_count`,
+          entityCount: sql`excluded.entity_count`,
+          riskScore: sql`excluded.risk_score`,
+          confidence: sql`excluded.confidence`,
+          verdict: sql`excluded.verdict`,
+          requiresReview: sql`excluded.requires_review`,
+          reviewReason: sql`excluded.review_reason`,
+          signals: sql`excluded.signals`,
+          counterSignals: sql`excluded.counter_signals`,
+          features: sql`excluded.features`,
+          explanation: sql`excluded.explanation`,
+          explanationSource: sql`excluded.explanation_source`,
+          stability: sql`excluded.stability`,
+          correlationId: sql`excluded.correlation_id`,
+        },
+      });
   }
 
+  // Membership rows are keyed on (cluster, entity) for the same reason: the
+  // same account in the same ring is one fact, not one per detection run.
   const memberRows = result.clusters.flatMap((c) =>
     c.members.map((entityId) => ({
-      id: newId("mem"),
+      id: `mem_${hashPayload({ clusterId: c.id, entityId }).slice(0, 20)}`,
       clusterId: c.id,
       entityId,
       entityType: "ACCOUNT" as const,
@@ -365,7 +410,17 @@ async function persistDetection(
 
   for (let i = 0; i < memberRows.length; i += 200) {
     const chunk = memberRows.slice(i, i + 200);
-    if (chunk.length > 0) await db.insert(clusterMembers).values(chunk);
+    if (chunk.length === 0) continue;
+    await db
+      .insert(clusterMembers)
+      .values(chunk)
+      .onConflictDoUpdate({
+        target: clusterMembers.id,
+        set: {
+          contribution: sql`excluded.contribution`,
+          joinedVia: sql`excluded.joined_via`,
+        },
+      });
   }
 
   await recordAudit(db, {
