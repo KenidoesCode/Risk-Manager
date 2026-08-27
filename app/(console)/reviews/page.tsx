@@ -2,7 +2,7 @@ import { ensureBootstrapped } from "@/db/bootstrap";
 import { getDb } from "@/db/client";
 import { getEnv } from "@/shared/env";
 import { dismissalReasons, listReviews, reviewerAgreement } from "@/reviews/service";
-import { Empty, Heading, Metric, Panel } from "@/ui/primitives";
+import { Heading, Metric, Panel } from "@/ui/primitives";
 import { ReviewQueue, type ReviewRow } from "@/ui/review-queue";
 
 export const dynamic = "force-dynamic";

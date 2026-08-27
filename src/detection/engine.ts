@@ -11,7 +11,7 @@ import {
   refundEvents,
   returnEvents,
 } from "../db/schema";
-import { buildGraph, loadGraph, type InMemoryGraph } from "../graph/builder";
+import { buildGraph, loadGraph } from "../graph/builder";
 import {
   jaccard,
   louvainClusters,

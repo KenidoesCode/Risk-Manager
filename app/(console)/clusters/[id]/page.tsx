@@ -7,7 +7,8 @@ import { getDb } from "@/db/client";
 import { getEnv } from "@/shared/env";
 import { VERDICT_DESCRIPTIONS, type ClusterVerdict } from "@/domain/vocabulary";
 import { ClusterDetail } from "@/ui/cluster-detail";
-import { Heading, Metric, RiskBar, StateChip } from "@/ui/primitives";
+import { ExportButton } from "@/ui/export-button";
+import { RiskBar, StateChip } from "@/ui/primitives";
 
 export const dynamic = "force-dynamic";
 
@@ -34,43 +35,62 @@ export default async function ClusterDetailPage({ params }: { params: Promise<{ 
 
   return (
     <>
-      <Link href="/clusters" className="web-strand text-xs text-[var(--color-chalk-faint)] hover:text-[var(--color-chalk-dim)]">
-        &larr; clusters
-      </Link>
-      <Heading kicker={c.method}>{c.id}</Heading>
+      {/*
+        The graph is the page.
 
-      <div className="mb-5 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <Metric label="Accounts" value={c.accountCount} />
-        <Metric
-          label="Risk"
-          value={c.riskScore.toFixed(1)}
-          denominator="/ 100"
-          tone={c.riskScore >= env.RISK_THRESHOLD ? "strand" : "neutral"}
-          hint={`Detection threshold ${env.RISK_THRESHOLD}`}
-        />
-        <Metric
-          label="Confidence"
-          value={`${(c.confidence * 100).toFixed(0)}%`}
-          tone={c.confidence < env.CONFIDENCE_THRESHOLD ? "possible" : "neutral"}
-          hint="How well the evidence supports any interpretation. Independent of the risk score."
-        />
-        <Metric label="Nodes in subgraph" value={subgraph.nodes.length} hint={`${subgraph.edges.length} links`} />
-      </div>
+        The console used to open with a heading and four metric tiles, which
+        pushed the only surface that shows a RING below the fold. A ring is a
+        shape; a reader recognises it in one look and cannot recognise it at all
+        from a risk number. So the figures compress into a single command bar and
+        the web gets the rest of the screen.
+      */}
+      <div className="panel mb-5 flex flex-wrap items-center gap-x-6 gap-y-3 px-5 py-3.5">
+        <Link
+          href="/clusters"
+          className="strand text-[0.6875rem] text-[var(--color-ink-faint)] hover:text-[var(--color-ink)]"
+        >
+          &larr; rings
+        </Link>
 
-      <div className="web-panel web-clip mb-5 p-5">
-        <div className="flex flex-wrap items-center gap-3">
-          <StateChip state={c.verdict} />
-          <RiskBar risk={c.riskScore} threshold={env.RISK_THRESHOLD} />
-          {c.requiresReview && (
-            <span className="web-strand text-[0.6875rem] text-[var(--color-state-unknown)]">
-              routed to review: {c.reviewReason}
-            </span>
-          )}
+        <div className="min-w-0">
+          <p className="label">{c.method}</p>
+          <p className="strand truncate text-sm text-[var(--color-ink)]">{c.id}</p>
         </div>
-        <p className="mt-3 max-w-3xl text-xs leading-relaxed text-[var(--color-chalk-dim)]">
-          {VERDICT_DESCRIPTIONS[c.verdict as ClusterVerdict]}
-        </p>
+
+        <StateChip state={c.verdict} />
+
+        <div className="flex items-baseline gap-1.5">
+          <span className="title text-xl text-[var(--color-ink)]">{c.riskScore.toFixed(1)}</span>
+          <span className="label">/ 100 risk</span>
+        </div>
+
+        <div className="min-w-[9rem] flex-1">
+          <RiskBar risk={c.riskScore} threshold={env.RISK_THRESHOLD} />
+        </div>
+
+        <div className="flex items-baseline gap-1.5">
+          <span className="title text-xl text-[var(--color-ink)]">{(c.confidence * 100).toFixed(0)}%</span>
+          <span className="label">confidence</span>
+        </div>
+
+        <div className="flex items-baseline gap-1.5">
+          <span className="title text-xl text-[var(--color-ink)]">{c.accountCount}</span>
+          <span className="label">accounts · {subgraph.nodes.length} nodes · {subgraph.edges.length} links</span>
+        </div>
+
+        <div className="ml-auto">
+          <ExportButton clusterId={c.id} />
+        </div>
       </div>
+
+      {c.requiresReview && (
+        <div className="panel panel-possible mb-5 px-5 py-3">
+          <span className="caption caption-amber">ROUTED TO REVIEW</span>
+          <p className="mt-2 text-xs leading-relaxed text-[var(--color-ink-soft)]">
+            {c.reviewReason} — {VERDICT_DESCRIPTIONS[c.verdict as ClusterVerdict]}
+          </p>
+        </div>
+      )}
 
       <ClusterDetail
         cluster={{

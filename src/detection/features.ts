@@ -98,7 +98,7 @@ function saturate(value: number, low: number, high: number): number {
   return Number(Math.max(0, Math.min(1, (value - low) / (high - low))).toFixed(4));
 }
 
-export function aggregateCluster(activities: AccountActivity[], cluster: Cluster): ClusterAggregate {
+export function aggregateCluster(activities: AccountActivity[], _cluster: Cluster): ClusterAggregate {
   const orders = activities.flatMap((a) => a.orders);
   const returns = activities.flatMap((a) => a.returns);
   const refunds = activities.flatMap((a) => a.refunds);

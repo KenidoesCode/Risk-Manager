@@ -22,49 +22,107 @@
  * banners; nothing here does either. There is no red, and no word for guilt.
  */
 
+/*
+ * SPIDER-VERSE — NEWSPRINT
+ *
+ * The first version of this console was a near-black ground with a hot pink
+ * accent. That is the default look of every generated dark dashboard, and it
+ * was also wrong about the subject: Spider-Verse's visual language is PRINT.
+ * Cheap newsprint, Ben-Day halftone dots, and the cyan/magenta misregistration
+ * you get when the plates are a hair out of alignment.
+ *
+ * So the ground is paper. Ink is near-black, the two process colours are the
+ * accents, and the misregistration is real — the display type is printed twice,
+ * offset, in cyan and magenta behind the black.
+ *
+ * Colour is state, never decoration:
+ *
+ *   MAGENTA   a confirmed ring, or a link the detector is confident about
+ *   CYAN      a derived link — inferred, not observed
+ *   AMBER     possible, below the operating threshold
+ *   INK       everything else
+ *
+ * Data surfaces are black ink on paper, which is the highest-contrast
+ * combination available and the one a fraud analyst can read for eight hours.
+ */
+
 @theme {
-  --color-web-void: #05060d;
-  --color-web-base: #090b16;
-  --color-web-panel: #10131f;
-  --color-web-raised: #171b2b;
-  --color-web-line: #232840;
-  --color-web-line-bright: #3a4166;
+  --color-paper: #f2efe4;
+  --color-paper-bright: #faf8f1;
+  --color-paper-sunk: #e6e2d4;
+  --color-paper-edge: #d5d0be;
 
-  --color-chalk: #e8eaf5;
-  --color-chalk-dim: #9298b8;
-  --color-chalk-faint: #626884;
+  --color-ink: #16141c;
+  --color-ink-soft: #45414f;
+  --color-ink-faint: #7d7889;
 
-  --color-strand: #ff2d92;
-  --color-strand-deep: #b8005f;
-  --color-strand-glow: #ff6ab5;
+  --color-magenta: #e5006d;
+  --color-magenta-soft: #ff4d9b;
+  --color-cyan: #00a9c8;
+  --color-cyan-soft: #4fd6ec;
+  --color-amber: #e08700;
+  --color-clear: #1f8a53;
+  --color-violet: #6d28d9;
 
-  --color-node: #22d3ee;
-  --color-node-deep: #0e7490;
-
-  --color-state-likely: #ff2d92;
-  --color-state-possible: #fbbf24;
-  --color-state-clear: #34d399;
-  --color-state-unknown: #a78bfa;
-
-  --font-web: var(--font-space-grotesk), ui-sans-serif, system-ui, sans-serif;
+  --font-web: var(--font-public), ui-sans-serif, system-ui, sans-serif;
+  --font-title: var(--font-bungee), ui-sans-serif, system-ui, sans-serif;
   --font-strand: var(--font-mono-web), ui-monospace, "SF Mono", Menlo, monospace;
+
+  /* ------------------------------------------------------------------ */
+  /* The old dark-mode names, repointed at the print palette.            */
+  /* ------------------------------------------------------------------ */
+  /*
+   * The console was built against a dark palette whose token names are used in
+   * about a hundred and fifty places. Renaming every reference would touch every
+   * file to change nothing but a string, so the names stay and the VALUES move.
+   *
+   * The mapping inverts the surface: what was the darkest ground is now paper,
+   * and what was the lightest text is now ink. Every existing component
+   * therefore reads correctly on the new ground without being edited, and the
+   * pages being redesigned use the new names directly.
+   */
+  --color-web-void: var(--color-paper);
+  --color-web-base: var(--color-paper);
+  --color-web-panel: var(--color-paper-bright);
+  --color-web-raised: var(--color-paper-sunk);
+  --color-web-line: var(--color-paper-edge);
+  --color-web-line-bright: var(--color-ink-faint);
+
+  --color-chalk: var(--color-ink);
+  --color-chalk-dim: var(--color-ink-soft);
+  --color-chalk-faint: var(--color-ink-faint);
+
+  --color-strand: var(--color-magenta);
+  --color-strand-deep: var(--color-magenta);
+  --color-strand-glow: var(--color-magenta-soft);
+
+  --color-node: var(--color-cyan);
+  --color-node-deep: var(--color-cyan);
+
+  --color-state-likely: var(--color-magenta);
+  --color-state-possible: var(--color-amber);
+  --color-state-clear: var(--color-clear);
+  --color-state-unknown: var(--color-violet);
 }
 
+
 :root {
-  color-scheme: dark;
+  color-scheme: light;
 }
 
 html {
-  background: var(--color-web-void);
+  background: var(--color-paper);
   scroll-behavior: smooth;
 }
 
 body {
-  background: var(--color-web-void);
-  color: var(--color-chalk);
+  background: var(--color-paper);
+  color: var(--color-ink);
   font-family: var(--font-web);
   -webkit-font-smoothing: antialiased;
-  overflow-x: hidden;
+  /* The paper grain: a fine halftone, always present, never animated. */
+  background-image: radial-gradient(var(--color-paper-edge) 0.6px, transparent 0.6px);
+  background-size: 4px 4px;
 }
 
 ::selection {
@@ -360,5 +418,181 @@ body {
   *::before,
   *::after {
     transition-duration: 0.01ms !important;
+  }
+}
+
+
+/* ==========================================================================
+   PRINT
+   ==========================================================================
+   Comic pages are panels with hard borders and generous gutters. That is the
+   whole layout system here: there is no sidebar and no card component, only
+   panels on a page.
+   ========================================================================== */
+
+.panel {
+  background: var(--color-paper-bright);
+  border: 2.5px solid var(--color-ink);
+  box-shadow: 4px 4px 0 var(--color-ink);
+  position: relative;
+}
+
+.panel-sunk {
+  background: var(--color-paper-sunk);
+  border: 2px solid var(--color-ink);
+}
+
+/* A panel that carries a finding. The colour is the state. */
+.panel-likely { border-color: var(--color-magenta); box-shadow: 4px 4px 0 var(--color-magenta); }
+.panel-derived { border-color: var(--color-cyan); box-shadow: 4px 4px 0 var(--color-cyan); }
+.panel-possible { border-color: var(--color-amber); box-shadow: 4px 4px 0 var(--color-amber); }
+
+/* The caption box in a comic panel's corner. */
+.caption {
+  display: inline-block;
+  background: var(--color-ink);
+  color: var(--color-paper-bright);
+  font-family: var(--font-title);
+  font-size: 0.625rem;
+  letter-spacing: 0.08em;
+  padding: 0.2rem 0.55rem;
+}
+
+.caption-magenta { background: var(--color-magenta); }
+.caption-cyan { background: var(--color-cyan); }
+.caption-amber { background: var(--color-amber); color: var(--color-ink); }
+
+/* Display type, printed three times: cyan and magenta plates a hair out of
+   register behind the black. This is the signature move and it is used on
+   headings only. */
+.misprint {
+  font-family: var(--font-title);
+  position: relative;
+  color: var(--color-ink);
+  text-shadow:
+    2px 2px 0 var(--color-cyan),
+    -2px -1px 0 var(--color-magenta);
+}
+
+.title {
+  font-family: var(--font-title);
+  letter-spacing: 0.01em;
+  line-height: 1.05;
+}
+
+.label {
+  font-family: var(--font-title);
+  font-size: 0.625rem;
+  letter-spacing: 0.12em;
+  color: var(--color-ink-faint);
+  text-transform: uppercase;
+}
+
+.strand {
+  font-family: var(--font-strand);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Ben-Day dots, used behind hero areas only. */
+.benday {
+  background-image: radial-gradient(var(--color-magenta) 1.4px, transparent 1.4px);
+  background-size: 9px 9px;
+  opacity: 0.18;
+}
+
+.benday-cyan {
+  background-image: radial-gradient(var(--color-cyan) 1.4px, transparent 1.4px);
+  background-size: 9px 9px;
+  opacity: 0.16;
+}
+
+/* Tables: black ink on paper. */
+.web-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.8125rem;
+}
+
+.web-table thead th {
+  font-family: var(--font-title);
+  font-size: 0.5625rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-ink-faint);
+  text-align: left;
+  padding: 0.45rem 0.7rem;
+  border-bottom: 2px solid var(--color-ink);
+  white-space: nowrap;
+}
+
+.web-table tbody td {
+  padding: 0.55rem 0.7rem;
+  border-bottom: 1px solid var(--color-paper-edge);
+  vertical-align: top;
+}
+
+.web-table tbody tr:hover { background: var(--color-paper-sunk); }
+
+.web-scroll { overflow-x: auto; }
+
+/* Controls stamped like printed buttons. */
+.stamp-button {
+  font-family: var(--font-title);
+  font-size: 0.6875rem;
+  letter-spacing: 0.08em;
+  padding: 0.5rem 1rem;
+  border: 2.5px solid var(--color-ink);
+  background: var(--color-magenta);
+  color: var(--color-paper-bright);
+  box-shadow: 3px 3px 0 var(--color-ink);
+  cursor: pointer;
+  transition: transform 90ms ease, box-shadow 90ms ease;
+}
+
+.stamp-button:hover:not(:disabled) {
+  transform: translate(1px, 1px);
+  box-shadow: 2px 2px 0 var(--color-ink);
+}
+
+.stamp-button:active:not(:disabled) {
+  transform: translate(3px, 3px);
+  box-shadow: 0 0 0 var(--color-ink);
+}
+
+.stamp-button:disabled { opacity: 0.45; cursor: not-allowed; }
+
+.stamp-button-ghost {
+  background: var(--color-paper-bright);
+  color: var(--color-ink);
+}
+
+:focus-visible {
+  outline: 3px solid var(--color-magenta);
+  outline-offset: 2px;
+}
+
+/* The issue banner: the masthead strip that replaced the sidebar. */
+.issue-tab {
+  font-family: var(--font-title);
+  font-size: 0.625rem;
+  letter-spacing: 0.1em;
+  padding: 0.42rem 0.75rem;
+  border: 2px solid var(--color-ink);
+  background: var(--color-paper-bright);
+  color: var(--color-ink);
+  white-space: nowrap;
+}
+
+.issue-tab[aria-current="page"] {
+  background: var(--color-ink);
+  color: var(--color-paper-bright);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .stamp-button,
+  .stamp-button:hover,
+  .stamp-button:active {
+    transform: none !important;
+    transition: none !important;
   }
 }

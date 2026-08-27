@@ -98,19 +98,16 @@ export function intraDensity(graph: InMemoryGraph, members: string[]): number {
   if (members.length < 2) return 0;
   const set = new Set(members);
   let weight = 0;
-  let counted = 0;
 
   for (const m of members) {
     for (const edge of graph.adjacency.get(m) ?? []) {
       if (!set.has(edge.to)) continue;
       weight += edge.weight;
-      counted += 1;
     }
   }
 
   // Each undirected edge was counted from both ends.
   weight /= 2;
-  counted /= 2;
 
   const possible = (members.length * (members.length - 1)) / 2;
   if (possible === 0) return 0;

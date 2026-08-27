@@ -175,7 +175,7 @@ export default async function OverviewPage() {
             </div>
           </div>
           <p className="mt-4 text-xs leading-relaxed text-[var(--color-chalk-faint)]">
-            This population-wide return rate is what "unusually high" is measured against. It
+            This population-wide return rate is what &quot;unusually high&quot; is measured against. It
             describes the synthetic corpus and would need re-deriving from real data before
             production use — a threshold calibrated to the wrong population is how a detector starts
             flagging ordinary customers.
