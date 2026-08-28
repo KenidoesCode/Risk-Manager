@@ -35,7 +35,7 @@ export function Masthead({ openClusters, pendingReviews }: { openClusters: numbe
 
   return (
     <header className="masthead sticky top-0 z-40">
-      <div className="page flex flex-wrap items-center gap-x-3 gap-y-2 pt-3 pb-2 sm:gap-x-5">
+      <div className="page flex flex-nowrap overflow-x-auto nav-strip md:flex-wrap md:overflow-visible items-center gap-x-3 gap-y-2 pt-3 pb-2 sm:gap-x-5">
         <Link href="/" className="flex items-center gap-2.5">
           <span className="reg t-m" aria-hidden />
           <span className="wordmark text-base sm:text-lg">Ring Sentinel</span>
