@@ -1,5 +1,6 @@
 import { getDb, runMigrations } from "./client";
 import { getEnv } from "../shared/env";
+import { withDeterministicIds } from "../shared/ids";
 import { logger } from "../shared/logger";
 import { entities } from "./schema";
 
@@ -25,7 +26,11 @@ let bootstrapping: Promise<void> | null = null;
 export async function ensureBootstrapped(): Promise<void> {
   if (bootstrapping) return bootstrapping;
 
-  bootstrapping = (async () => {
+  // The whole cold-start path runs in deterministic-id mode — seeding, graph
+  // build and detection alike — so that two instances that bootstrap
+  // independently produce byte-identical identifiers in every table. See
+  // `withDeterministicIds` for the failure that requires it.
+  bootstrapping = withDeterministicIds(async () => {
     const started = Date.now();
     await runMigrations();
     const db = await getDb();
@@ -69,7 +74,7 @@ export async function ensureBootstrapped(): Promise<void> {
       clusters: detection.clusters.length,
       inMemory: getEnv().pgliteInMemory,
     });
-  })().catch((error: unknown) => {
+  }).catch((error: unknown) => {
     bootstrapping = null;
     throw error;
   });
