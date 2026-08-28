@@ -752,3 +752,167 @@
     transition-duration: 0.01ms !important;
   }
 }
+
+/* ==========================================================================
+   RESPONSIVE LAYER
+   ==========================================================================
+
+   Appended deliberately at the end and DELIBERATELY UNLAYERED. Tailwind's
+   utilities sit in `@layer utilities`, and any unlayered declaration outranks
+   every layered one regardless of specificity — so a rule here beats a `px-8`
+   that someone leaves behind. That is a safety net, not the plan: the fixed
+   gutters and fixed grid-column utilities have been removed from the markup
+   as well, because a layout that depends on the cascade-layer ordering to be
+   correct is a layout that breaks the first time the build tool changes.
+
+   The approach is fluid first, breakpoints second. A ladder of media queries
+   produces a layout that is right at five widths and unconsidered between
+   them; clamp() and auto-fit make the layout a continuous function of the
+   viewport instead. There is exactly one width breakpoint below, for the
+   navigation, because "wrap or scroll" is genuinely a discrete choice.
+
+   Nothing here changes a colour, a number, a query or a word of copy. It
+   changes how much room things take.
+   ========================================================================== */
+
+/* 1 — THE PAGE NEVER SCROLLS SIDEWAYS.
+   `clip` rather than `hidden`: overflow-x:hidden makes the body a scroll
+   container, which silently kills `position: sticky` on the masthead. The
+   designated containers (.scroll-x, the graph, the tables) still scroll. */
+html,
+body {
+  overflow-x: clip;
+  max-width: 100%;
+}
+
+/* 2 — FLUID BODY TEXT.
+   The floor is the size the console reads at today, so nothing gets smaller
+   on a phone than it already is; the ceiling adds a point on a wide screen. */
+body {
+  font-size: clamp(1rem, 0.97rem + 0.15vw, 1.0625rem);
+}
+
+/* 3 — THE GUTTER, AS A CLASS.
+   Was px-5 / sm:px-7 on <main> and on both masthead rows: 20px of a 360px
+   screen spent on nothing at each edge. 4vw is 14.4px there and reaches the
+   old 1.75rem at 700px, so the desktop measure is unchanged.
+
+   .page and .page-6 are used by the console shell and the landing page
+   respectively, and both are applied to the nav container as well so the
+   header rules and the body content share one left edge. */
+.page {
+  max-width: 1500px;
+  margin-inline: auto;
+  padding-inline: clamp(0.875rem, 4vw, 1.75rem);
+}
+
+.page-6 {
+  max-width: 72rem;
+  margin-inline: auto;
+  padding-inline: clamp(0.875rem, 4vw, 1.5rem);
+}
+
+/* 4 — FLUID DISPLAY TYPE.
+   A page title at a fixed 1.75rem and a metric figure at a fixed 1.5rem both
+   break lines at 360px. Ceilings are the sizes that shipped. */
+.dsp-page {
+  font-size: clamp(1.25rem, 1rem + 2.2vw, 1.75rem);
+}
+
+.fig {
+  font-size: clamp(1.15rem, 0.95rem + 1.4vw, 1.5rem);
+  line-height: 1.1;
+}
+
+/* 5 — FLUID PANEL PADDING.
+   A sheet on a 360px screen was spending 1.15rem a side inside a gutter that
+   was already spending 1.25rem. Ceilings are the shipped values. */
+.sheet-hd {
+  padding: clamp(0.7rem, 2.6vw, 0.85rem) clamp(0.8rem, 3.2vw, 1.15rem);
+}
+
+.sheet-bd {
+  padding: clamp(0.85rem, 3vw, 1.15rem);
+}
+
+.empty {
+  padding: clamp(1.35rem, 5vw, 2.25rem) clamp(1rem, 4vw, 1.5rem);
+}
+
+/* The landing-page sheets, which carried a flat p-6. */
+.pad {
+  padding: clamp(0.95rem, 4vw, 1.5rem);
+}
+
+/* 6 — CARD GRIDS AS A CONTINUOUS FUNCTION.
+   These replace 1 -> 3 and 1 -> 4 jumps. `min(100%, …)` is load-bearing: a
+   bare minmax(18rem, 1fr) overflows a 320px viewport with a single card,
+   which is the exact failure this pass exists to remove.
+
+   .cards is tuned so that the widest console column (1500px less its gutters)
+   holds four metric cards and not five, which is the arrangement the metric
+   rows were designed around; below that it steps 4 -> 3 -> 2 -> 1 on its own.
+   The `grid` utility stays on these elements alongside the class, because the
+   base layer's `:where(.flex, .grid) > * { min-width: 0 }` keys off it. */
+.cards {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr));
+}
+
+/* Medium tiles: scenario result panels, review form fields. */
+.cards-m {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 13rem), 1fr));
+}
+
+/* Label-and-figure pairs, which need very little room each. */
+.cards-s {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 8.5rem), 1fr));
+}
+
+/* 7 — WIDE FIXED-GRID CONTENT SCROLLS IN ITS OWN CONTAINER.
+   The cluster graph is the signature surface of this product and it does not
+   reflow: node positions come from a deterministic layout in a fixed 900x520
+   viewBox, and squeezing that into 340px makes an illegible smear rather than
+   a small graph. So the SVG keeps its min-width and the wrapper scrolls — the
+   same pattern every table on this site already uses. This rule states the
+   contract on the wrapper rather than leaving it implied by a utility class,
+   and gives the touch affordance the tables get. */
+.graph-scroll {
+  overflow-x: auto;
+  max-width: 100%;
+  overscroll-behavior-inline: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* 8 — THE NAV, BELOW ~720px, IS A SCROLLING STRIP.
+   Nine section names wrapped instead of scrolled push the masthead to three
+   lines and shove the first sheet off the opening screen. It already scrolls
+   at every width; below 720px it loses its scrollbar chrome and the
+   registration target beside the wordmark, which is decoration that costs
+   horizontal room on the one row that cannot afford it. */
+.nav-strip {
+  flex-wrap: nowrap;
+  overflow-x: auto;
+}
+
+@media (max-width: 719.98px) {
+  .nav-strip {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    overscroll-behavior-inline: contain;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .nav-strip::-webkit-scrollbar {
+    display: none;
+    height: 0;
+    width: 0;
+  }
+
+  /* The plate-maker's registration target in the masthead. Decorative, and
+     `aria-hidden` already, so removing it costs a reader nothing. */
+  .masthead .reg {
+    display: none;
+  }
+}

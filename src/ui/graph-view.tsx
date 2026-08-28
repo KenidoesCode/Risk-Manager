@@ -284,7 +284,7 @@ export function GraphView({
       </div>
 
       {/* -------------------------------------------------- CANVAS --- */}
-      <div className="sheet scroll-x">
+      <div className="sheet scroll-x graph-scroll">
         <svg
           ref={svgRef}
           viewBox={`0 0 ${WIDTH} ${HEIGHT}`}

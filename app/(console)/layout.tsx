@@ -33,7 +33,7 @@ export default async function ConsoleLayout({ children }: { children: React.Reac
   return (
     <div className="min-h-screen">
       <Masthead openClusters={openClusters} pendingReviews={pendingReviews} />
-      <main className="mx-auto max-w-[1500px] px-5 py-8 sm:px-7">{children}</main>
+      <main className="page py-8">{children}</main>
     </div>
   );
 }

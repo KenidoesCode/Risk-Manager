@@ -78,7 +78,7 @@ export function Metric({
   return (
     <div className="sheet px-4 py-3">
       <p className="cap">{label}</p>
-      <p className={`num mt-1.5 text-2xl font-medium ${missing ? "t-3" : TONE_CLASS[tone]}`}>
+      <p className={`num fig mt-1.5 font-medium ${missing ? "t-3" : TONE_CLASS[tone]}`}>
         {missing ? "—" : value}
         {!missing && denominator && <span className="ml-1.5 text-xs t-3">{denominator}</span>}
       </p>
@@ -230,7 +230,7 @@ export function Heading({ children, kicker }: { children: ReactNode; kicker?: st
   return (
     <div className="mb-6">
       {kicker && <p className="cap mb-1">{kicker}</p>}
-      <h1 className="dsp text-2xl sm:text-[1.75rem]">{children}</h1>
+      <h1 className="dsp dsp-page">{children}</h1>
       <div className="strip mt-2.5 max-w-[13rem]" aria-hidden />
     </div>
   );

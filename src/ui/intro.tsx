@@ -102,7 +102,7 @@ export function Intro() {
   return (
     <div>
       {/* ------------------------------------------------------ HERO ---- */}
-      <section className="mx-auto grid max-w-6xl items-center gap-10 px-6 py-16 lg:grid-cols-[1.05fr_1fr] lg:py-24">
+      <section className="page-6 grid items-center gap-10 py-16 lg:grid-cols-[1.05fr_1fr] lg:py-24">
         <div>
           <p className="cap mb-4 flex items-center gap-2.5">
             <span className="reg t-m" aria-hidden />
@@ -137,7 +137,7 @@ export function Intro() {
         </div>
 
         {/* The thesis, drawn with the mechanism it describes. */}
-        <figure className="sheet marks p-4 sm:p-6">
+        <figure className="sheet marks pad">
           <figcaption className="cap mb-3">One film tints. Three go nearly black.</figcaption>
           <div className="stack-win" style={{ aspectRatio: "5 / 4" }}>
             <svg
@@ -190,7 +190,7 @@ export function Intro() {
 
       {/* ------------------------------------------------- THE PLEDGES --- */}
       <div className="border-y border-[var(--rule)] bg-[rgba(255,255,255,0.6)]">
-        <div className="mx-auto flex max-w-6xl flex-wrap items-center gap-x-6 gap-y-2 px-6 py-3">
+        <div className="page-6 flex flex-wrap items-center gap-x-6 gap-y-2 py-3">
           {PLEDGES.map((p) => (
             <span key={p} className="cap flex items-center gap-2">
               <span className="t-m" aria-hidden>
@@ -203,10 +203,10 @@ export function Intro() {
       </div>
 
       {/* ---------------------------------------------------- STAGES ---- */}
-      <section className="mx-auto max-w-6xl px-6 py-16 sm:py-20">
+      <section className="page-6 py-16 sm:py-20">
         <div className="grid gap-5 md:grid-cols-2">
           {STAGES.map((stage) => (
-            <article key={stage.kicker} className="sheet p-6">
+            <article key={stage.kicker} className="sheet pad">
               <p className={`cap ${stage.tone}`}>{stage.plate} plate</p>
               <p className="cap mt-3">{stage.kicker}</p>
               <h2 className="mt-1.5 text-lg font-bold tracking-tight t-ink">{stage.title}</h2>
@@ -231,7 +231,7 @@ export function Intro() {
           </div>
         </div>
 
-        <div className="sheet marks mt-14 border-l-[3px] border-l-[var(--ink-m)] p-6">
+        <div className="sheet marks pad mt-14 border-l-[3px] border-l-[var(--ink-m)]">
           <p className="cap">What this refuses to do</p>
           <ul className="mt-4 space-y-2.5">
             {[

@@ -29,7 +29,7 @@ export default async function SettingsPage() {
         </div>
       )}
 
-      <div className="grid gap-5 lg:grid-cols-2">
+      <div className="grid gap-5 md:grid-cols-2">
         <Sheet title="Sentinel mode">
           <dl className="space-y-3">
             <div>
@@ -137,7 +137,7 @@ export default async function SettingsPage() {
       </div>
 
       <Sheet title="Explanation model" className="mt-5">
-        <dl className="grid gap-4 sm:grid-cols-3">
+        <dl className="grid cards-s gap-4">
           <div>
             <dt className="cap">Provider</dt>
             <dd className="num mt-0.5 text-sm t-ink">{env.model.provider}</dd>

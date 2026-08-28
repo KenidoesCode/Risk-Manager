@@ -60,7 +60,7 @@ export default async function ReviewsPage() {
     <>
       <Heading kicker="The board">Human review</Heading>
 
-      <div className="mb-6 grid gap-4 sm:grid-cols-3">
+      <div className="mb-6 grid cards gap-4">
         <Metric label="Awaiting a person" value={pending.length} tone="unknown" />
         <Metric label="Decided" value={decided.length} />
         <Metric

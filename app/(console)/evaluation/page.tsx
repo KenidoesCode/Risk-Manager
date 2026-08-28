@@ -84,7 +84,7 @@ export default async function EvaluationPage() {
       </div>
 
       {metrics?.ring && (
-        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <div className="grid cards gap-4">
           <Metric
             label="Ring precision"
             value={pct(metrics.ring.precision.value)}
@@ -163,7 +163,7 @@ export default async function EvaluationPage() {
           subtitle="The product's central claim, measured — and able to falsify it."
           className="mt-5"
         >
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="grid cards-s gap-4">
             <div>
               <p className="cap">Suspicious rings</p>
               <p className="num mt-1 text-lg">{recovery.suspiciousRings}</p>
@@ -319,7 +319,7 @@ export default async function EvaluationPage() {
       )}
 
       {/* -------------------------------------------------- SLICES -- */}
-      <div className="mt-5 grid gap-5 lg:grid-cols-2">
+      <div className="mt-5 grid gap-5 md:grid-cols-2">
         <Sheet title="By difficulty">
           <div className="scroll-x">
             <table className="tbl">

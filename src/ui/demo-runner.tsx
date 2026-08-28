@@ -137,7 +137,7 @@ export function DemoRunner({ scenarios }: { scenarios: ScenarioSpec[] }) {
 
               {result && (
                 <div className="rule-x mt-4 pt-4">
-                  <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                  <div className="grid cards-m gap-3">
                     <div>
                       <p className="cap">Verdict</p>
                       <div className="mt-1">

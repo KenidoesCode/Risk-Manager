@@ -35,7 +35,7 @@ export function Masthead({ openClusters, pendingReviews }: { openClusters: numbe
 
   return (
     <header className="masthead sticky top-0 z-40">
-      <div className="mx-auto flex max-w-[1500px] flex-wrap items-center gap-x-5 gap-y-2 px-5 pt-3 pb-2 sm:px-7">
+      <div className="page flex flex-wrap items-center gap-x-3 gap-y-2 pt-3 pb-2 sm:gap-x-5">
         <Link href="/" className="flex items-center gap-2.5">
           <span className="reg t-m" aria-hidden />
           <span className="wordmark text-base sm:text-lg">Ring Sentinel</span>
@@ -53,7 +53,7 @@ export function Masthead({ openClusters, pendingReviews }: { openClusters: numbe
 
       <nav
         aria-label="Sections"
-        className="scroll-x mx-auto flex max-w-[1500px] gap-0.5 px-5 pb-2 sm:px-7"
+        className="nav-strip page flex gap-0.5 pb-2"
       >
         {SECTIONS.map((section) => {
           const active = pathname === section.href || pathname.startsWith(`${section.href}/`);

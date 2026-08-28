@@ -155,7 +155,7 @@ export function ReviewQueue({ reviews, riskThreshold }: { reviews: ReviewRow[]; 
               </div>
             ) : (
               <div className="rule-x mt-4 pt-4">
-                <div className="grid gap-3 sm:grid-cols-3">
+                <div className="grid cards-m gap-3">
                   <label className="block">
                     <span className="cap">Reviewer note (optional)</span>
                     <textarea
