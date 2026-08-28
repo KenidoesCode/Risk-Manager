@@ -1,7 +1,7 @@
 import { failureSummary } from "@/api/queries";
 import { ensureBootstrapped } from "@/db/bootstrap";
 import { getDb } from "@/db/client";
-import { Empty, Heading, Panel, Relative } from "@/ui/primitives";
+import { Empty, Heading, Relative, Sheet } from "@/ui/primitives";
 
 export const dynamic = "force-dynamic";
 
@@ -11,11 +11,20 @@ export default async function FailuresPage() {
   const summary = await failureSummary(db);
   const categories = Object.entries(summary.categories);
 
+  const edge = (count: number, severity: string) =>
+    count === 0
+      ? "var(--rule)"
+      : severity === "warning"
+        ? "var(--ink-y)"
+        : severity === "notice"
+          ? "var(--ink-b)"
+          : "var(--ink-c)";
+
   return (
     <>
       <Heading kicker="Check the detector">Failure modes</Heading>
 
-      <p className="mb-6 max-w-3xl text-xs leading-relaxed text-[var(--color-chalk-dim)]">
+      <p className="note mb-6 max-w-3xl">
         Every failure path here reduces what the system claims or routes the decision to a person.
         None of them defaults to a detection. The counts are actual audit events from this instance -
         a category showing zero has genuinely not occurred, not been hidden.
@@ -25,48 +34,31 @@ export default async function FailuresPage() {
         {categories.map(([key, c]) => (
           <article
             key={key}
-            className="web-panel web-clip p-5"
-            style={{
-              borderLeft: `2px solid ${
-                c.count === 0
-                  ? "var(--color-web-line)"
-                  : c.severity === "warning"
-                    ? "var(--color-state-possible)"
-                    : c.severity === "notice"
-                      ? "var(--color-state-unknown)"
-                      : "var(--color-node)"
-              }`,
-            }}
+            className="sheet p-5"
+            style={{ borderLeft: `3px solid ${edge(c.count, c.severity)}` }}
           >
             <div className="flex items-start justify-between gap-3">
-              <h3 className="web-strand text-xs font-semibold text-[var(--color-chalk)]">
-                {key.replace(/_/g, " ")}
-              </h3>
-              <span
-                className={`web-strand text-lg ${c.count === 0 ? "text-[var(--color-chalk-faint)]" : "text-[var(--color-chalk)]"}`}
-              >
-                {c.count}
-              </span>
+              <h3 className="mono text-xs font-medium t-ink">{key.replace(/_/g, " ")}</h3>
+              <span className={`num shrink-0 text-lg ${c.count === 0 ? "t-3" : "t-ink"}`}>{c.count}</span>
             </div>
-            <p className="mt-2 text-xs leading-relaxed text-[var(--color-chalk-dim)]">{c.description}</p>
-            <p className="mt-2 border-t border-[var(--color-web-line)] pt-2 text-[0.6875rem] leading-relaxed text-[var(--color-chalk-faint)]">
-              <span className="web-label">What the system did</span>
-              <br />
-              {c.handledBy}
-            </p>
+            <p className="note mt-2">{c.description}</p>
+            <div className="rule-x mt-3 pt-2">
+              <p className="cap">What the system did</p>
+              <p className="note-s mt-0.5">{c.handledBy}</p>
+            </div>
           </article>
         ))}
       </div>
 
-      <Panel title="Recent failure and block events" className="mt-6">
+      <Sheet title="Recent failure and block events" className="mt-6">
         {summary.recent.length === 0 ? (
           <Empty
             title="No failure or block events recorded on this instance."
             detail="Run the demo scenarios to exercise the guardrail and injection paths, or POST to /api/enforce to see the enforcement refusal audited."
           />
         ) : (
-          <div className="overflow-x-auto">
-            <table className="web-table">
+          <div className="scroll-x">
+            <table className="tbl">
               <thead>
                 <tr>
                   <th>#</th>
@@ -80,21 +72,13 @@ export default async function FailuresPage() {
               <tbody>
                 {summary.recent.map((e) => (
                   <tr key={e.id}>
-                    <td className="web-strand text-[0.625rem] text-[var(--color-chalk-faint)]">{e.sequence}</td>
-                    <td className="web-strand text-xs text-[var(--color-chalk)]">{e.action}</td>
-                    <td className="web-strand text-[0.625rem] text-[var(--color-chalk-faint)]">{e.objectId}</td>
+                    <td className="num text-[0.625rem] t-3">{e.sequence}</td>
+                    <td className="mono text-xs t-ink">{e.action}</td>
+                    <td className="id t-3">{e.objectId}</td>
                     <td>
-                      <span
-                        className={`web-stamp ${
-                          e.result === "BLOCKED"
-                            ? "text-[var(--color-strand)]"
-                            : "text-[var(--color-state-possible)]"
-                        }`}
-                      >
-                        {e.result}
-                      </span>
+                      <span className={`tag ${e.result === "BLOCKED" ? "tag-m" : "tag-y"}`}>{e.result}</span>
                     </td>
-                    <td className="text-[0.6875rem] text-[var(--color-chalk-dim)]">{e.severity}</td>
+                    <td className="note-s">{e.severity}</td>
                     <td>
                       <Relative iso={e.timestamp} />
                     </td>
@@ -104,7 +88,7 @@ export default async function FailuresPage() {
             </table>
           </div>
         )}
-      </Panel>
+      </Sheet>
     </>
   );
 }

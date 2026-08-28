@@ -85,15 +85,13 @@ export function DemoRunner({ scenarios }: { scenarios: ScenarioSpec[] }) {
           type="button"
           onClick={runAll}
           disabled={busy !== null}
-          className="web-clip inline-flex items-center gap-2 bg-[var(--color-strand)] px-4 py-2 text-xs font-semibold text-white transition hover:bg-[var(--color-strand-glow)] disabled:opacity-50"
+          className="btn inline-flex items-center gap-2"
         >
           {busy ? <Loader2 size={13} className="animate-spin" aria-hidden /> : <PlayCircle size={13} aria-hidden />}
           Run every scenario
         </button>
         {completed > 0 && (
-          <span className="web-strand text-xs text-[var(--color-chalk-dim)]">
-            {passing}/{completed} behaved as specified
-          </span>
+          <span className="num text-xs t-2">{passing}/{completed} behaved as specified</span>
         )}
       </div>
 
@@ -102,59 +100,55 @@ export function DemoRunner({ scenarios }: { scenarios: ScenarioSpec[] }) {
           const result = results[s.key];
           const running = busy === s.key;
           return (
-            <article key={s.key} className="web-panel web-clip p-5">
+            <article key={s.key} className="sheet p-5">
               <div className="flex flex-wrap items-start justify-between gap-4">
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2">
-                    <h3 className="text-sm font-semibold text-[var(--color-chalk)]">{s.title}</h3>
+                    <h3 className="text-sm font-bold t-ink">{s.title}</h3>
                     {result &&
                       (result.behavedAsSpecified ? (
-                        <span className="inline-flex items-center gap-1 text-[0.6875rem] text-[var(--color-state-clear)]">
+                        <span className="inline-flex items-center gap-1 text-[0.6875rem] t-g">
                           <CheckCircle2 size={12} aria-hidden /> AS SPECIFIED
                         </span>
                       ) : (
-                        <span className="inline-flex items-center gap-1 text-[0.6875rem] text-[var(--color-strand)]">
+                        <span className="inline-flex items-center gap-1 text-[0.6875rem] t-m">
                           <XCircle size={12} aria-hidden /> DEVIATED
                         </span>
                       ))}
                   </div>
-                  <p className="mt-1.5 max-w-2xl text-xs leading-relaxed text-[var(--color-chalk-dim)]">
-                    {s.description}
-                  </p>
+                  <p className="note mt-1.5 max-w-2xl">{s.description}</p>
                 </div>
 
                 <button
                   type="button"
                   onClick={() => run(s.key)}
                   disabled={busy !== null}
-                  className="web-clip shrink-0 border border-[var(--color-web-line-bright)] px-3.5 py-2 text-xs text-[var(--color-chalk-dim)] transition hover:border-[var(--color-strand)] hover:text-[var(--color-chalk)] disabled:opacity-40"
+                  className="btn btn-ghost shrink-0"
                 >
                   {running ? <Loader2 size={12} className="inline animate-spin" aria-hidden /> : null} Run
                 </button>
               </div>
 
-              <p className="mt-3 border-l-2 border-l-[var(--color-web-line-bright)] pl-3 text-[0.6875rem] leading-relaxed text-[var(--color-chalk-faint)]">
-                {s.claim}
-              </p>
+              <p className="note-s mt-3 border-l-2 border-l-[var(--rule)] pl-3">{s.claim}</p>
 
               {errors[s.key] && (
-                <p className="mt-3 text-[0.6875rem] text-[var(--color-strand)]">{errors[s.key]}</p>
+                <p className="note-s mt-3 t-m">{errors[s.key]}</p>
               )}
 
               {result && (
-                <div className="mt-4 border-t border-[var(--color-web-line)] pt-4">
-                  <div className="grid gap-3 text-xs sm:grid-cols-2 lg:grid-cols-4">
+                <div className="rule-x mt-4 pt-4">
+                  <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
                     <div>
-                      <p className="web-label">Verdict</p>
+                      <p className="cap">Verdict</p>
                       <div className="mt-1">
                         <StateChip state={result.observed.verdict} />
                       </div>
                     </div>
                     <div>
-                      <p className="web-label">Risk</p>
-                      <p className="web-strand mt-1.5">
+                      <p className="cap">Risk</p>
+                      <p className="num mt-1.5 text-sm">
                         {result.observed.riskScore.toFixed(1)}
-                        <span className="text-[0.625rem] text-[var(--color-chalk-faint)]">
+                        <span className="text-[0.625rem] t-3">
                           {" "}
                           (struct {result.observed.structuralPoints.toFixed(0)} / behav{" "}
                           {result.observed.behaviouralPoints.toFixed(0)})
@@ -162,30 +156,28 @@ export function DemoRunner({ scenarios }: { scenarios: ScenarioSpec[] }) {
                       </p>
                     </div>
                     <div>
-                      <p className="web-label">Confidence</p>
-                      <p className="web-strand mt-1.5">{(result.observed.confidence * 100).toFixed(0)}%</p>
+                      <p className="cap">Confidence</p>
+                      <p className="num mt-1.5 text-sm">{(result.observed.confidence * 100).toFixed(0)}%</p>
                     </div>
                     <div>
-                      <p className="web-label">Account baseline says</p>
-                      <p className="web-strand mt-1.5 text-[0.6875rem]">
+                      <p className="cap">Account baseline says</p>
+                      <p className="num mt-1.5 text-[0.6875rem]">
                         flags {result.observed.baselineFlaggedAccounts} of {result.observed.accountCount}
                       </p>
                     </div>
                   </div>
 
                   {result.observed.requiresReview && (
-                    <p className="mt-3 text-[0.6875rem] text-[var(--color-state-unknown)]">
-                      Routed to a person: {result.observed.reviewReason}
-                    </p>
+                    <p className="note-s mt-3 t-b">Routed to a person: {result.observed.reviewReason}</p>
                   )}
                   {result.observed.cappedByGuardrail && (
-                    <p className="mt-2 text-[0.6875rem] text-[var(--color-state-clear)]">
+                    <p className="note-s mt-2 t-g">
                       Score capped by the structural-only guardrail. Shared infrastructure alone
                       cannot reach the detection threshold.
                     </p>
                   )}
                   {result.observed.injectionFindings > 0 && (
-                    <p className="mt-2 text-[0.6875rem] text-[var(--color-state-possible)]">
+                    <p className="note-s mt-2 t-y">
                       {result.observed.injectionFindings} injected instruction span(s) quarantined. The
                       injection asked for a zero score and no review; it got neither.
                     </p>
@@ -193,9 +185,7 @@ export function DemoRunner({ scenarios }: { scenarios: ScenarioSpec[] }) {
 
                   {result.assessment && result.assessment.signals.filter((x) => x.points > 0.05).length > 0 && (
                     <details className="mt-3">
-                      <summary className="web-label cursor-pointer select-none">
-                        Signal breakdown
-                      </summary>
+                      <summary className="cap cursor-pointer select-none">Signal breakdown</summary>
                       <ul className="mt-2">
                         {result.assessment.signals
                           .filter((x) => x.points > 0.05)
@@ -215,9 +205,7 @@ export function DemoRunner({ scenarios }: { scenarios: ScenarioSpec[] }) {
                   {result.deviations.length > 0 && (
                     <ul className="mt-3 space-y-1">
                       {result.deviations.map((d, i) => (
-                        <li key={i} className="text-[0.6875rem] text-[var(--color-strand)]">
-                          DEVIATION &mdash; {d}
-                        </li>
+                        <li key={i} className="note-s t-m">DEVIATION &mdash; {d}</li>
                       ))}
                     </ul>
                   )}

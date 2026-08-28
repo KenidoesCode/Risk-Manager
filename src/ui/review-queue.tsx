@@ -100,94 +100,88 @@ export function ReviewQueue({ reviews, riskThreshold }: { reviews: ReviewRow[]; 
         const decided = r.status !== "PENDING";
         const working = busy === r.id || pending;
         return (
-          <article key={r.id} className="web-panel web-clip p-5">
+          <article key={r.id} className="sheet p-5">
             <div className="flex flex-wrap items-start justify-between gap-4">
               <div className="min-w-0">
                 <div className="flex flex-wrap items-center gap-2">
                   <Link
                     href={`/clusters/${r.clusterId}`}
-                    className="web-strand text-sm text-[var(--color-chalk)] hover:text-[var(--color-strand)]"
+                    className="id text-sm t-ink hover:text-[var(--ink-m)]"
                   >
                     {r.clusterId}
                   </Link>
                   <StateChip state={r.status} />
-                  <span className="web-strand text-[0.625rem] text-[var(--color-chalk-faint)]">
-                    {r.reasonCode}
-                  </span>
+                  <span className="mono text-[0.625rem] t-3">{r.reasonCode}</span>
                 </div>
-                <p className="mt-2 max-w-2xl text-xs leading-relaxed text-[var(--color-chalk-dim)]">
-                  {r.reasonDetail}
-                </p>
+                <p className="note mt-2 max-w-2xl">{r.reasonDetail}</p>
                 <Link
                   href={`/clusters/${r.clusterId}`}
-                  className="web-strand mt-2 inline-block text-[0.6875rem] text-[var(--color-node)] hover:underline"
+                  className="mono mt-2 inline-block text-[0.6875rem] t-c hover:underline"
                 >
                   Open the graph and the full signal breakdown &rarr;
                 </Link>
               </div>
 
               <div className="text-right">
-                <p className="web-label">Detector assessment</p>
+                <p className="cap">Detector assessment</p>
                 <div className="mt-1 flex items-center justify-end gap-2">
                   <StateChip state={r.machineVerdict} />
                 </div>
                 <div className="mt-1.5 flex items-center justify-end gap-2">
                   <RiskBar risk={r.machineRisk} threshold={riskThreshold} />
                 </div>
-                <p className="web-strand mt-1 text-[0.6875rem] text-[var(--color-chalk-faint)]">
+                <p className="num mt-1 text-[0.6875rem] t-3">
                   confidence {(r.machineConfidence * 100).toFixed(0)}% &middot; {r.cluster.accountCount} accounts
                 </p>
               </div>
             </div>
 
             {decided ? (
-              <div className="mt-4 border-t border-[var(--color-web-line)] pt-3">
-                <p className="text-[0.6875rem] leading-relaxed text-[var(--color-chalk-faint)]">
-                  Decided by <span className="web-strand">{r.reviewedBy}</span>. Detector said{" "}
-                  <span className="web-strand">{r.machineVerdict}</span>; reviewer said{" "}
-                  <span className="web-strand">{r.reviewerVerdict ?? "not recorded"}</span>. Both are
+              <div className="rule-x mt-4 pt-3">
+                <p className="note-s">
+                  Decided by <span className="mono">{r.reviewedBy}</span>. Detector said{" "}
+                  <span className="mono">{r.machineVerdict}</span>; reviewer said{" "}
+                  <span className="mono">{r.reviewerVerdict ?? "not recorded"}</span>. Both are
                   kept &mdash; the reviewer&rsquo;s decision never overwrites the detector&rsquo;s.
                 </p>
                 {r.benignExplanation && (
-                  <p className="mt-2 border-l-2 border-l-[var(--color-state-clear)] pl-3 text-xs leading-relaxed text-[var(--color-chalk-dim)]">
+                  <p className="note mt-2 border-l-2 border-l-[var(--ink-g)] pl-3">
                     Accepted explanation: {r.benignExplanation}
                   </p>
                 )}
                 {r.reviewerNote && (
-                  <p className="mt-2 border-l-2 border-l-[var(--color-web-line-bright)] pl-3 text-xs italic text-[var(--color-chalk-dim)]">
-                    {r.reviewerNote}
-                  </p>
+                  <p className="note mt-2 border-l-2 border-l-[var(--rule)] pl-3 italic">{r.reviewerNote}</p>
                 )}
               </div>
             ) : (
-              <div className="mt-4 border-t border-[var(--color-web-line)] pt-4">
+              <div className="rule-x mt-4 pt-4">
                 <div className="grid gap-3 sm:grid-cols-3">
                   <label className="block">
-                    <span className="web-label">Reviewer note (optional)</span>
+                    <span className="cap">Reviewer note (optional)</span>
                     <textarea
                       value={notes[r.id] ?? ""}
                       onChange={(e) => setNotes((n) => ({ ...n, [r.id]: e.target.value }))}
                       rows={2}
-                      className="web-strand mt-1.5 w-full resize-y border border-[var(--color-web-line)] bg-[var(--color-web-void)] px-2.5 py-2 text-xs text-[var(--color-chalk)] outline-none focus:border-[var(--color-strand)]"
+                      className="field mt-1.5 resize-y"
                       placeholder="What you saw in the graph."
                     />
                   </label>
                   <label className="block">
-                    <span className="web-label">Benign explanation (required to dismiss)</span>
+                    <span className="cap">Benign explanation (required to dismiss)</span>
                     <textarea
                       value={benign[r.id] ?? ""}
                       onChange={(e) => setBenign((b) => ({ ...b, [r.id]: e.target.value }))}
                       rows={2}
-                      className="web-strand mt-1.5 w-full resize-y border border-[var(--color-web-line)] bg-[var(--color-web-void)] px-2.5 py-2 text-xs text-[var(--color-chalk)] outline-none focus:border-[var(--color-state-clear)]"
+                      className="field mt-1.5 resize-y"
                       placeholder="e.g. student house, one address, separate cards."
                     />
                   </label>
                   <label className="block">
-                    <span className="web-label">Your own verdict (optional)</span>
+                    <span className="cap">Your own verdict (optional)</span>
                     <select
                       value={verdicts[r.id] ?? ""}
                       onChange={(e) => setVerdicts((v) => ({ ...v, [r.id]: e.target.value }))}
-                      className="web-strand mt-1.5 w-full border border-[var(--color-web-line)] bg-[var(--color-web-void)] px-2.5 py-2 text-xs text-[var(--color-chalk)] outline-none focus:border-[var(--color-strand)]"
+                      className="field mt-1.5"
                     >
                       <option value="">&mdash; not recorded &mdash;</option>
                       {["COORDINATION_LIKELY", "COORDINATION_POSSIBLE", "NO_COORDINATION_INDICATED", "INSUFFICIENT_DATA"].map(
@@ -198,7 +192,7 @@ export function ReviewQueue({ reviews, riskThreshold }: { reviews: ReviewRow[]; 
                         ),
                       )}
                     </select>
-                    <span className="mt-1 block text-[0.625rem] leading-snug text-[var(--color-chalk-faint)]">
+                    <span className="note-s mt-1 block">
                       Recording it lets the console report how often reviewers and the detector
                       disagree.
                     </span>
@@ -213,7 +207,7 @@ export function ReviewQueue({ reviews, riskThreshold }: { reviews: ReviewRow[]; 
                       title={d.hint}
                       disabled={working}
                       onClick={() => decide(r.id, d.key)}
-                      className="web-clip border border-[var(--color-web-line-bright)] px-3.5 py-2 text-xs text-[var(--color-chalk-dim)] transition hover:border-[var(--color-strand)] hover:text-[var(--color-chalk)] disabled:opacity-40"
+                      className="btn btn-ghost"
                     >
                       {working ? <Loader2 size={12} className="inline animate-spin" aria-hidden /> : null} {d.label}
                     </button>
@@ -221,7 +215,7 @@ export function ReviewQueue({ reviews, riskThreshold }: { reviews: ReviewRow[]; 
                 </div>
 
                 {errors[r.id] && (
-                  <p className="mt-2 text-[0.6875rem] text-[var(--color-strand)]">{errors[r.id]}</p>
+                  <p className="note-s mt-2 t-m">{errors[r.id]}</p>
                 )}
               </div>
             )}

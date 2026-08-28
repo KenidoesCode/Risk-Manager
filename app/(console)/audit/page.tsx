@@ -3,9 +3,17 @@ import Link from "next/link";
 import { AUDIT_ACTIONS, queryAudit } from "@/audit/service";
 import { ensureBootstrapped } from "@/db/bootstrap";
 import { getDb } from "@/db/client";
-import { Empty, Heading, Panel, Relative } from "@/ui/primitives";
+import { Empty, Heading, Relative, Sheet } from "@/ui/primitives";
 
 export const dynamic = "force-dynamic";
+
+/**
+ * Rows rendered into the HTML. The trail is append-only and ordered newest
+ * first, so this is the most recent window onto it; the number NOT shown is
+ * printed under the table and every event remains available through
+ * GET /api/audit.
+ */
+const ROWS = 60;
 
 export default async function AuditPage({
   searchParams,
@@ -22,7 +30,7 @@ export default async function AuditPage({
     action: params.action,
     severity: params.severity,
     result: params.result,
-    limit: 120,
+    limit: ROWS,
   });
 
   const linkFor = (patch: Record<string, string | undefined>) => {
@@ -36,39 +44,39 @@ export default async function AuditPage({
     <>
       <Heading kicker="Check the detector">Audit trail</Heading>
 
-      <p className="mb-5 max-w-3xl text-xs leading-relaxed text-[var(--color-chalk-dim)]">
+      <p className="note mb-5 max-w-3xl">
         Append-only. Nothing here is updated or deleted. Filter by correlation id to reconstruct one
         request end to end, or by cluster id to reconstruct everything that happened to a cluster.
       </p>
 
-      <div className="mb-5 flex flex-wrap gap-1.5">
-        <Link
-          href="/audit"
-          className={`web-stamp ${!params.action ? "border-[var(--color-strand)] text-[var(--color-strand)]" : "border-[var(--color-web-line)] text-[var(--color-chalk-dim)]"}`}
-        >
+      <div className="mb-5 flex flex-wrap gap-1">
+        <Link href="/audit" className={`tag ${!params.action ? "tag-m" : "tag-n"}`}>
           ALL
         </Link>
         {AUDIT_ACTIONS.map((a) => (
           <Link
             key={a}
             href={linkFor({ action: params.action === a ? undefined : a })}
-            className={`web-strand px-2 py-1 text-[0.625rem] tracking-wide transition ${
-              params.action === a
-                ? "bg-[var(--color-strand)] text-white"
-                : "bg-[var(--color-web-panel)] text-[var(--color-chalk-faint)] hover:text-[var(--color-chalk-dim)]"
-            }`}
+            className={`tag ${params.action === a ? "tag-c" : "tag-n"}`}
           >
             {a}
           </Link>
         ))}
       </div>
 
-      <Panel title="Events" subtitle={`${result.events.length} shown of ${result.total} total`}>
+      <Sheet
+        title="Events"
+        subtitle={
+          result.total > result.events.length
+            ? `Showing the ${result.events.length} most recent of ${result.total} matching. The rest are available through GET /api/audit.`
+            : `${result.events.length} of ${result.total} matching.`
+        }
+      >
         {result.events.length === 0 ? (
           <Empty title="No audit events match this filter." />
         ) : (
-          <div className="overflow-x-auto">
-            <table className="web-table">
+          <div className="scroll-x">
+            <table className="tbl">
               <thead>
                 <tr>
                   <th>#</th>
@@ -84,38 +92,33 @@ export default async function AuditPage({
               <tbody>
                 {result.events.map((e) => (
                   <tr key={e.id}>
-                    <td className="web-strand text-[0.625rem] text-[var(--color-chalk-faint)]">{e.sequence}</td>
-                    <td className="web-strand text-xs text-[var(--color-chalk)]">{e.action}</td>
-                    <td className="text-[0.6875rem] text-[var(--color-chalk-dim)]">
+                    <td className="num text-[0.625rem] t-3">{e.sequence}</td>
+                    <td className="mono text-xs t-ink">{e.action}</td>
+                    <td className="note-s">
                       {e.actorType.toLowerCase()}
                       <br />
-                      <span className="web-strand text-[0.625rem] text-[var(--color-chalk-faint)]">
-                        {e.actorId}
-                      </span>
+                      <span className="id t-3">{e.actorId}</span>
                     </td>
-                    <td className="web-strand text-[0.625rem] text-[var(--color-chalk-faint)]">{e.objectType}</td>
+                    <td className="id t-3">{e.objectType}</td>
                     <td>
                       {e.clusterId ? (
-                        <Link
-                          href={`/clusters/${e.clusterId}`}
-                          className="web-strand text-[0.625rem] text-[var(--color-chalk-dim)] hover:text-[var(--color-strand)]"
-                        >
+                        <Link href={`/clusters/${e.clusterId}`} className="id t-2 hover:text-[var(--ink-m)]">
                           {e.clusterId.slice(-10)}
                         </Link>
                       ) : (
-                        <span className="text-[var(--color-chalk-faint)]">&mdash;</span>
+                        <span className="t-3">&mdash;</span>
                       )}
                     </td>
                     <td>
                       <span
-                        className={`web-stamp ${
+                        className={`tag ${
                           e.result === "SUCCESS"
-                            ? "text-[var(--color-state-clear)]"
+                            ? "tag-g"
                             : e.result === "BLOCKED"
-                              ? "text-[var(--color-strand)]"
+                              ? "tag-m"
                               : e.result === "FAILURE"
-                                ? "text-[var(--color-state-possible)]"
-                                : "text-[var(--color-chalk-faint)]"
+                                ? "tag-y"
+                                : "tag-n"
                         }`}
                       >
                         {e.result}
@@ -124,7 +127,7 @@ export default async function AuditPage({
                     <td>
                       <Link
                         href={linkFor({ correlationId: e.correlationId })}
-                        className="web-strand text-[0.625rem] text-[var(--color-chalk-faint)] hover:text-[var(--color-strand)]"
+                        className="id t-3 hover:text-[var(--ink-m)]"
                       >
                         {e.correlationId.slice(0, 14)}&hellip;
                       </Link>
@@ -138,7 +141,7 @@ export default async function AuditPage({
             </table>
           </div>
         )}
-      </Panel>
+      </Sheet>
     </>
   );
 }

@@ -58,13 +58,13 @@ export function DetectButton() {
         type="button"
         onClick={run}
         disabled={running}
-        className="web-clip inline-flex items-center gap-2 bg-[var(--color-strand)] px-4 py-2 text-xs font-semibold text-white transition hover:bg-[var(--color-strand-glow)] disabled:opacity-50"
+        className="btn inline-flex items-center gap-2"
       >
         {running ? <Loader2 size={13} className="animate-spin" aria-hidden /> : <Play size={13} aria-hidden />}
         {running ? "Detecting…" : "Run detection"}
       </button>
-      {summary && <p className="max-w-md text-right text-[0.6875rem] text-[var(--color-chalk-faint)]">{summary}</p>}
-      {error && <p className="max-w-xs text-right text-[0.6875rem] text-[var(--color-strand)]">{error}</p>}
+      {summary && <p className="note-s max-w-md text-right">{summary}</p>}
+      {error && <p className="note-s max-w-xs text-right t-m">{error}</p>}
     </div>
   );
 }

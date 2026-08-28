@@ -1,35 +1,32 @@
 import type { Metadata, Viewport } from "next";
-import { Bungee, JetBrains_Mono, Public_Sans } from "next/font/google";
+import { Archivo, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 
-/*
- * Fonts are fetched at BUILD time and served from this origin, so a running
- * instance makes no third-party request.
- */
-/*
- * Bungee for display. It is a signage face — blocky, all-caps, built for
- * posters — and it is the closest thing on a font CDN to a comic title card.
- * Used only for headings and panel labels: the console has to stay readable
- * under the costume, so Public Sans carries every sentence and every number.
- */
-const display = Bungee({
-  subsets: ["latin"],
-  weight: ["400"],
-  variable: "--font-bungee",
-  display: "swap",
-});
+import { Curtain } from "@/ui/curtain";
 
-const body = Public_Sans({
+/*
+ * Two families, six files, fetched at BUILD time and served from this origin.
+ * A running instance makes no third-party request.
+ *
+ * Archivo is a grotesque drawn for print signage and technical setting, which
+ * is the vernacular of the room this console is pretending to be in: a light
+ * table, a control strip, a plate label. Set in tight uppercase for headings
+ * and at 400 for everything a person actually reads.
+ *
+ * JetBrains Mono carries identifiers, densities and every column of figures,
+ * with tabular numerals so scores line up down a table.
+ */
+const sans = Archivo({
   subsets: ["latin"],
   weight: ["400", "500", "600", "700"],
-  variable: "--font-public",
+  variable: "--font-archivo",
   display: "swap",
 });
 
 const mono = JetBrains_Mono({
   subsets: ["latin"],
-  weight: ["400", "500", "600"],
-  variable: "--font-mono-web",
+  weight: ["400", "500"],
+  variable: "--font-mono",
   display: "swap",
 });
 
@@ -40,15 +37,18 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#05060d",
+  themeColor: "#f4f8fa",
   width: "device-width",
   initialScale: 1,
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${display.variable} ${body.variable} ${mono.variable}`}>
-      <body>{children}</body>
+    <html lang="en" className={`${sans.variable} ${mono.variable}`}>
+      <body>
+        <Curtain />
+        {children}
+      </body>
     </html>
   );
 }

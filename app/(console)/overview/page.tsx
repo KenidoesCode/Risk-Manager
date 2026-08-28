@@ -4,7 +4,7 @@ import { overviewMetrics } from "@/api/queries";
 import { ensureBootstrapped } from "@/db/bootstrap";
 import { getDb } from "@/db/client";
 import { getEnv } from "@/shared/env";
-import { Empty, Heading, Metric, Panel, StateChip } from "@/ui/primitives";
+import { Empty, Heading, Metric, Sheet, StateChip } from "@/ui/primitives";
 import { DetectButton } from "@/ui/detect-button";
 
 export const dynamic = "force-dynamic";
@@ -25,7 +25,7 @@ export default async function OverviewPage() {
   if (!m.seeded) {
     return (
       <>
-        <Heading kicker="Board">Overview</Heading>
+        <Heading kicker="The board">Overview</Heading>
         <Empty
           title="No graph data available."
           detail="Run `npm run db:seed` to generate the synthetic corpus. Nothing is displayed until there is something to measure."
@@ -36,10 +36,17 @@ export default async function OverviewPage() {
 
   const pct = (v: number | null) => (v === null ? null : `${(v * 100).toFixed(1)}%`);
 
+  const VERDICT_FILL: Record<string, string> = {
+    COORDINATION_LIKELY: "var(--ink-m)",
+    COORDINATION_POSSIBLE: "var(--ink-y)",
+    INSUFFICIENT_DATA: "var(--ink-b)",
+    NO_COORDINATION_INDICATED: "var(--ink-g)",
+  };
+
   return (
     <>
       <div className="mb-6 flex flex-wrap items-start justify-between gap-4">
-        <Heading kicker="Board">Overview</Heading>
+        <Heading kicker="The board">Overview</Heading>
         <DetectButton />
       </div>
 
@@ -48,12 +55,13 @@ export default async function OverviewPage() {
         <Metric
           label="Observed links"
           value={m.graph.rawEdges}
+          tone="structural"
           hint="Asserted by an event. Never inferred."
         />
         <Metric
           label="Inferred links"
           value={m.graph.derivedEdges}
-          tone="strand"
+          tone="behavioural"
           hint="Account-to-account, derived from a shared node. Always marked as derived."
         />
         <Metric
@@ -71,7 +79,7 @@ export default async function OverviewPage() {
         <Metric
           label="Coordination likely"
           value={m.detection.byVerdict.COORDINATION_LIKELY ?? 0}
-          tone="strand"
+          tone="behavioural"
           hint="Recommended for investigation. Not a finding of fraud."
         />
         <Metric
@@ -89,7 +97,7 @@ export default async function OverviewPage() {
       </div>
 
       <div className="mt-8 grid gap-5 lg:grid-cols-2">
-        <Panel title="Verdict distribution" subtitle="Deterministic. The model contributes no part of this.">
+        <Sheet title="Verdict distribution" subtitle="Deterministic. The model contributes no part of this.">
           {Object.keys(m.detection.byVerdict).length === 0 ? (
             <Empty title="No detection has been run." detail="Press Run detection above." />
           ) : (
@@ -100,114 +108,102 @@ export default async function OverviewPage() {
                   const n = m.detection.byVerdict[verdict] ?? 0;
                   const share = n / Math.max(1, m.detection.clusters);
                   return (
-                    <li key={verdict} className="flex items-center gap-3">
+                    <li key={verdict} className="flex flex-wrap items-center gap-x-3 gap-y-1.5">
                       <span className="w-52 shrink-0">
                         <StateChip state={verdict} />
                       </span>
-                      <div className="web-bar flex-1">
-                        <span
-                          style={{
-                            width: `${share * 100}%`,
-                            background:
-                              verdict === "COORDINATION_LIKELY"
-                                ? "var(--color-strand)"
-                                : verdict === "COORDINATION_POSSIBLE"
-                                  ? "var(--color-state-possible)"
-                                  : verdict === "INSUFFICIENT_DATA"
-                                    ? "var(--color-state-unknown)"
-                                    : "var(--color-state-clear)",
-                          }}
-                        />
+                      <div className="meter min-w-[6rem] flex-1">
+                        <span style={{ width: `${share * 100}%`, background: VERDICT_FILL[verdict] }} />
                       </div>
-                      <span className="web-strand w-12 text-right text-xs text-[var(--color-chalk-dim)]">{n}</span>
+                      <span className="num w-10 shrink-0 text-right text-xs t-2">{n}</span>
                     </li>
                   );
                 })}
             </ul>
           )}
-        </Panel>
+        </Sheet>
 
-        <Panel title="Graph composition">
+        <Sheet title="Graph composition">
           <ul className="space-y-2.5">
             {Object.entries(m.graph.byType)
               .sort((a, b) => b[1] - a[1])
               .map(([type, n]) => (
-                <li key={type} className="flex items-center gap-3">
-                  <span className="web-strand w-28 shrink-0 text-xs text-[var(--color-chalk-dim)]">{type}</span>
-                  <div className="web-bar flex-1">
+                <li key={type} className="flex flex-wrap items-center gap-x-3 gap-y-1.5">
+                  <span className="mono w-24 shrink-0 text-xs t-2">{type}</span>
+                  <div className="meter min-w-[5rem] flex-1">
                     <span
                       style={{
                         width: `${(n / Math.max(1, m.graph.entities)) * 100}%`,
-                        background: "var(--color-node)",
+                        background: "var(--ink-c)",
                       }}
                     />
                   </div>
-                  <span className="web-strand w-14 text-right text-xs text-[var(--color-chalk-dim)]">{n}</span>
+                  <span className="num w-14 shrink-0 text-right text-xs t-2">{n}</span>
                 </li>
               ))}
           </ul>
-          <p className="mt-4 text-[0.6875rem] leading-relaxed text-[var(--color-chalk-faint)]">
+          <p className="note-s mt-4">
             Device, address and payment nodes hold anonymised hashes, never raw identifiers. The only
             question the detection asks of them is whether two accounts touched the SAME one, and an
             exact match on a stable hash answers that completely.
           </p>
-        </Panel>
+        </Sheet>
       </div>
 
       <div className="mt-5 grid gap-5 lg:grid-cols-3">
-        <Panel title="Activity" className="lg:col-span-2">
+        <Sheet title="Activity" className="lg:col-span-2">
           <div className="grid gap-4 sm:grid-cols-4">
             <div>
-              <p className="web-label">Orders</p>
-              <p className="web-strand mt-1 text-lg">{m.activity.orders}</p>
+              <p className="cap">Orders</p>
+              <p className="num mt-1 text-lg">{m.activity.orders}</p>
             </div>
             <div>
-              <p className="web-label">Returns</p>
-              <p className="web-strand mt-1 text-lg">{m.activity.returns}</p>
+              <p className="cap">Returns</p>
+              <p className="num mt-1 text-lg">{m.activity.returns}</p>
             </div>
             <div>
-              <p className="web-label">Refunds</p>
-              <p className="web-strand mt-1 text-lg">{m.activity.refunds}</p>
+              <p className="cap">Refunds</p>
+              <p className="num mt-1 text-lg">{m.activity.refunds}</p>
             </div>
             <div>
-              <p className="web-label">Return rate</p>
-              <p className="web-strand mt-1 text-lg">{pct(m.activity.returnRate) ?? "—"}</p>
+              <p className="cap">Return rate</p>
+              <p className="num mt-1 text-lg">{pct(m.activity.returnRate) ?? "—"}</p>
             </div>
           </div>
-          <p className="mt-4 text-xs leading-relaxed text-[var(--color-chalk-faint)]">
-            This population-wide return rate is what &quot;unusually high&quot; is measured against. It
-            describes the synthetic corpus and would need re-deriving from real data before
+          <p className="note mt-4 max-w-2xl">
+            This population-wide return rate is what &quot;unusually high&quot; is measured against.
+            It describes the synthetic corpus and would need re-deriving from real data before
             production use — a threshold calibrated to the wrong population is how a detector starts
             flagging ordinary customers.
           </p>
-          <Link href="/clusters" className="web-strand mt-4 inline-block text-xs text-[var(--color-strand)] hover:underline">
+          <Link href="/clusters" className="mono mt-4 inline-block text-xs t-m hover:underline">
             Open the cluster list &rarr;
           </Link>
-        </Panel>
+        </Sheet>
 
-        <Panel title="Detector">
-          <dl className="space-y-3 text-xs">
+        <Sheet title="Detector">
+          <dl className="space-y-3">
             <div>
-              <dt className="web-label">Risk threshold</dt>
-              <dd className="web-strand mt-1 text-[var(--color-chalk)]">{env.RISK_THRESHOLD} / 100</dd>
+              <dt className="cap">Risk threshold</dt>
+              <dd className="num mt-1 text-sm t-ink">{env.RISK_THRESHOLD} / 100</dd>
             </div>
             <div>
-              <dt className="web-label">Confidence threshold</dt>
-              <dd className="web-strand mt-1 text-[var(--color-chalk)]">{env.CONFIDENCE_THRESHOLD}</dd>
+              <dt className="cap">Confidence threshold</dt>
+              <dd className="num mt-1 text-sm t-ink">{env.CONFIDENCE_THRESHOLD}</dd>
             </div>
             <div>
-              <dt className="web-label">Explanation model</dt>
-              <dd className="web-strand mt-1 text-[var(--color-chalk)]">
+              <dt className="cap">Explanation model</dt>
+              <dd className="mono mt-1 text-xs t-ink">
                 {env.llmEnabled ? `${env.LLM_PROVIDER} · ${env.LLM_MODEL}` : "none configured"}
               </dd>
             </div>
           </dl>
-          <p className="mt-4 text-[0.6875rem] leading-relaxed text-[var(--color-chalk-faint)]">
+          <p className="note-s mt-4">
             The model writes prose only. It never scores, never clusters, never decides, and an
             explanation naming a signal the detector did not compute is discarded entirely. With no
             provider configured every figure in this console is deterministic.
           </p>
-        </Panel>
+        </Sheet>
       </div>
     </>
   );

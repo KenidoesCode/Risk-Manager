@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 
 /**
  * Interactive cluster graph.
@@ -20,10 +20,11 @@ import { useEffect, useMemo, useRef, useState } from "react";
  * ---------------------------------------------------------------------------
  * DERIVED EDGES LOOK DIFFERENT, ALWAYS
  * ---------------------------------------------------------------------------
- * A dashed magenta strand is an inference this system drew. A solid cyan line
- * is an observation from an event. They are never drawn the same way, because
- * the entire investigative value of this view is that a reviewer can tell which
- * is which and walk from one to the other.
+ * A dashed magenta line is an inference this system drew. A solid cyan line is
+ * an observation from an event. They are never drawn the same way, because the
+ * entire investigative value of this view is that a reviewer can tell which is
+ * which and walk from one to the other. Those are the same two plates the
+ * overlay stack prints on, and they mean the same two things here.
  */
 
 export interface GraphNode {
@@ -51,15 +52,19 @@ export interface GraphEdge {
   observationCount: number;
 }
 
+/*
+ * The process films and the two secondaries they make, so a node's colour is
+ * the same colour its evidence prints on in the overlay stack.
+ */
 const NODE_STYLE: Record<string, { fill: string; stroke: string; r: number }> = {
-  ACCOUNT: { fill: "#ff2d92", stroke: "#ff6ab5", r: 11 },
-  DEVICE: { fill: "#22d3ee", stroke: "#67e8f9", r: 8 },
-  ADDRESS: { fill: "#fbbf24", stroke: "#fcd34d", r: 8 },
-  PAYMENT: { fill: "#a78bfa", stroke: "#c4b5fd", r: 8 },
-  CUSTOMER: { fill: "#34d399", stroke: "#6ee7b7", r: 7 },
+  ACCOUNT: { fill: "#ec008c", stroke: "#bf0072", r: 11 },
+  DEVICE: { fill: "#00aeef", stroke: "#00738f", r: 8 },
+  ADDRESS: { fill: "#ffe800", stroke: "#8a6800", r: 8 },
+  PAYMENT: { fill: "#6a5cf0", stroke: "#4436c4", r: 8 },
+  CUSTOMER: { fill: "#19a86a", stroke: "#0d7145", r: 7 },
 };
 
-const DEFAULT_STYLE = { fill: "#626884", stroke: "#9298b8", r: 6 };
+const DEFAULT_STYLE = { fill: "#c3cfd8", stroke: "#7b8b96", r: 6 };
 
 /** Deterministic 32-bit hash, used to seed positions from node ids. */
 function hash(input: string): number {
@@ -194,16 +199,7 @@ export function GraphView({
   const [showRaw, setShowRaw] = useState(true);
   const [hidden, setHidden] = useState<Set<string>>(new Set());
   const [selected, setSelected] = useState<string | null>(null);
-  const [reduced, setReduced] = useState(false);
   const svgRef = useRef<SVGSVGElement>(null);
-
-  useEffect(() => {
-    const query = window.matchMedia("(prefers-reduced-motion: reduce)");
-    const apply = () => setReduced(query.matches);
-    apply();
-    query.addEventListener("change", apply);
-    return () => query.removeEventListener("change", apply);
-  }, []);
 
   const visibleNodes = useMemo(
     () => nodes.filter((n) => !hidden.has(n.type)),
@@ -250,11 +246,7 @@ export function GraphView({
           type="button"
           onClick={() => setShowDerived((v) => !v)}
           aria-pressed={showDerived}
-          className={`web-stamp transition ${
-            showDerived
-              ? "border-[var(--color-strand)] text-[var(--color-strand)]"
-              : "border-[var(--color-web-line)] text-[var(--color-chalk-faint)]"
-          }`}
+          className={`tag ${showDerived ? "tag-m" : "tag-n"}`}
         >
           Inferred links ({derivedCount})
         </button>
@@ -262,16 +254,12 @@ export function GraphView({
           type="button"
           onClick={() => setShowRaw((v) => !v)}
           aria-pressed={showRaw}
-          className={`web-stamp transition ${
-            showRaw
-              ? "border-[var(--color-node)] text-[var(--color-node)]"
-              : "border-[var(--color-web-line)] text-[var(--color-chalk-faint)]"
-          }`}
+          className={`tag ${showRaw ? "tag-c" : "tag-n"}`}
         >
           Observed links ({rawCount})
         </button>
 
-        <span className="mx-1 h-4 w-px bg-[var(--color-web-line)]" />
+        <span className="mx-1 h-4 w-px bg-[var(--rule)]" />
 
         {nodeTypes.map((type) => {
           const style = NODE_STYLE[type] ?? DEFAULT_STYLE;
@@ -282,10 +270,11 @@ export function GraphView({
               type="button"
               onClick={() => toggleType(type)}
               aria-pressed={on}
-              className="web-stamp transition"
+              className="tag"
               style={{
-                borderColor: on ? style.fill : "var(--color-web-line)",
-                color: on ? style.fill : "var(--color-chalk-faint)",
+                borderColor: on ? style.stroke : "var(--rule)",
+                color: on ? style.stroke : "var(--ink-3)",
+                background: on ? `color-mix(in srgb, ${style.fill} 14%, transparent)` : "transparent",
               }}
             >
               {type}
@@ -295,7 +284,7 @@ export function GraphView({
       </div>
 
       {/* -------------------------------------------------- CANVAS --- */}
-      <div className="web-panel overflow-x-auto">
+      <div className="sheet scroll-x">
         <svg
           ref={svgRef}
           viewBox={`0 0 ${WIDTH} ${HEIGHT}`}
@@ -304,21 +293,21 @@ export function GraphView({
           aria-label={`Cluster graph with ${visibleNodes.length} nodes and ${visibleEdges.length} links`}
         >
           <defs>
-            <pattern id="halftone-bg" width="12" height="12" patternUnits="userSpaceOnUse">
-              <circle cx="2" cy="2" r="0.7" fill="rgba(255,45,146,0.14)" />
-              <circle cx="8" cy="7" r="0.5" fill="rgba(34,211,238,0.12)" />
+            {/* The light box's own grid, ruled under the sheet. */}
+            <pattern id="lightbox-grid" width="20" height="20" patternUnits="userSpaceOnUse">
+              <path d="M20 0H0V20" fill="none" stroke="#10161b" strokeOpacity="0.05" strokeWidth="1" />
             </pattern>
           </defs>
-          <rect width={WIDTH} height={HEIGHT} fill="url(#halftone-bg)" />
+          <rect width={WIDTH} height={HEIGHT} fill="#ffffff" />
+          <rect width={WIDTH} height={HEIGHT} fill="url(#lightbox-grid)" />
 
           {/* Edges first, so nodes sit above them. */}
           <g>
-            {visibleEdges.map((edge, i) => {
+            {visibleEdges.map((edge) => {
               const a = positionOf.get(edge.source);
               const b = positionOf.get(edge.target);
               if (!a || !b) return null;
 
-              const length = Math.hypot(b.x - a.x, b.y - a.y);
               return (
                 <line
                   key={edge.id}
@@ -326,18 +315,10 @@ export function GraphView({
                   y1={a.y}
                   x2={b.x}
                   y2={b.y}
-                  stroke={edge.derived ? "var(--color-strand)" : "var(--color-node)"}
+                  stroke={edge.derived ? "var(--film-m)" : "var(--ink-c)"}
                   strokeWidth={edge.derived ? Math.max(1, edge.weight * 3) : 1.2}
-                  strokeOpacity={edge.derived ? 0.55 + edge.weight * 0.35 : 0.4}
-                  className={`graph-edge ${edge.derived ? "edge-derived" : ""} ${reduced ? "" : "strand-draw"}`}
-                  style={
-                    reduced
-                      ? undefined
-                      : ({
-                          "--strand-length": length,
-                          "--strand-delay": `${Math.min(0.6, i * 0.012)}s`,
-                        } as React.CSSProperties)
-                  }
+                  strokeOpacity={edge.derived ? 0.5 + edge.weight * 0.4 : 0.55}
+                  className={`g-edge ${edge.derived ? "g-derived" : ""}`}
                   onClick={() => onSelectEdge?.(edge)}
                 >
                   <title>
@@ -351,7 +332,7 @@ export function GraphView({
 
           {/* Nodes. */}
           <g>
-            {positioned.map((p, i) => {
+            {positioned.map((p) => {
               const style = NODE_STYLE[p.node.type] ?? DEFAULT_STYLE;
               const isSelected = selected === p.node.id;
               // An infrastructure node touched by many accounts is drawn bigger:
@@ -360,16 +341,16 @@ export function GraphView({
               const radius = style.r + Math.min(6, p.node.fanout * 0.35);
 
               return (
-                <g key={p.node.id} className={reduced ? "" : "node-pop"} style={reduced ? undefined : ({ "--node-delay": `${Math.min(0.8, i * 0.02)}s` } as React.CSSProperties)}>
+                <g key={p.node.id}>
                   <circle
                     cx={p.x}
                     cy={p.y}
                     r={radius}
                     fill={style.fill}
-                    fillOpacity={isSelected ? 1 : 0.82}
-                    stroke={isSelected ? "#fff" : style.stroke}
+                    fillOpacity={isSelected ? 0.95 : 0.7}
+                    stroke={isSelected ? "#10161b" : style.stroke}
                     strokeWidth={isSelected ? 3 : 1.5}
-                    className="graph-node"
+                    className="g-node"
                     onClick={() => {
                       setSelected(p.node.id);
                       onSelectNode?.(p.node);
@@ -395,9 +376,9 @@ export function GraphView({
                       x={p.x}
                       y={p.y + radius + 11}
                       textAnchor="middle"
-                      className="web-strand"
+                      className="mono"
                       fontSize="8"
-                      fill="var(--color-chalk-dim)"
+                      fill="var(--ink-3)"
                       pointerEvents="none"
                     >
                       {p.node.anonymizedKey.slice(-6)}
@@ -411,16 +392,16 @@ export function GraphView({
       </div>
 
       {/* --------------------------------------------------- LEGEND -- */}
-      <div className="mt-3 flex flex-wrap items-center gap-x-5 gap-y-2 text-[0.6875rem] text-[var(--color-chalk-faint)]">
+      <div className="note-s mt-3 flex flex-wrap items-center gap-x-5 gap-y-2">
         <span className="flex items-center gap-1.5">
           <svg width="26" height="6" aria-hidden>
-            <line x1="0" y1="3" x2="26" y2="3" stroke="var(--color-strand)" strokeWidth="2" strokeDasharray="5 4" />
+            <line x1="0" y1="3" x2="26" y2="3" stroke="var(--film-m)" strokeWidth="2" strokeDasharray="5 4" />
           </svg>
           Inferred — this system concluded it from a shared node
         </span>
         <span className="flex items-center gap-1.5">
           <svg width="26" height="6" aria-hidden>
-            <line x1="0" y1="3" x2="26" y2="3" stroke="var(--color-node)" strokeWidth="1.5" />
+            <line x1="0" y1="3" x2="26" y2="3" stroke="var(--ink-c)" strokeWidth="1.5" />
           </svg>
           Observed — an event asserted it
         </span>
@@ -428,7 +409,7 @@ export function GraphView({
       </div>
 
       {visibleNodes.length === 0 && (
-        <p className="mt-3 text-xs text-[var(--color-chalk-faint)]">
+        <p className="note-s mt-3">
           Every node type is hidden. Re-enable one above.
         </p>
       )}

@@ -1,598 +1,754 @@
 @import "tailwindcss";
 
-/*
- * SPIDER-VERSE — THE WEB IS THE DATA STRUCTURE
- *
- * The theme is chosen because it IS the subject. This product is a graph:
- * strands between accounts, nodes that hold a cluster together, the same actor
- * appearing as several variants. Halftone print, chromatic offset and the
- * magenta/cyan pair are the visual language of exactly that idea.
- *
- * Colour carries state and nothing else. A reader learns four things once:
- *
- *   MAGENTA  coordination indicated — the strand that matters
- *   CYAN     structural link, observed
- *   AMBER    possible coordination, or a signal below threshold
- *   VIOLET   the detector declined to decide — a human has it
- *
- * The costume stops at the chrome. Tables, numbers and evidence panels are
- * high-contrast and dense, because the output of this system is a decision to
- * investigate real people and it has to be readable under scrutiny. The
- * specification explicitly rules out neon-hacker theatre and giant FRAUD
- * banners; nothing here does either. There is no red, and no word for guilt.
- */
+/* ==========================================================================
+   LIGHT TABLE — WHY SUBTRACTIVE COLOUR IS THE RIGHT LANGUAGE FOR THIS PRODUCT
+   ==========================================================================
 
-/*
- * SPIDER-VERSE — NEWSPRINT
- *
- * The first version of this console was a near-black ground with a hot pink
- * accent. That is the default look of every generated dark dashboard, and it
- * was also wrong about the subject: Spider-Verse's visual language is PRINT.
- * Cheap newsprint, Ben-Day halftone dots, and the cyan/magenta misregistration
- * you get when the plates are a hair out of alignment.
- *
- * So the ground is paper. Ink is near-black, the two process colours are the
- * accents, and the misregistration is real — the display type is printed twice,
- * offset, in cyan and magenta behind the black.
- *
- * Colour is state, never decoration:
- *
- *   MAGENTA   a confirmed ring, or a link the detector is confident about
- *   CYAN      a derived link — inferred, not observed
- *   AMBER     possible, below the operating threshold
- *   INK       everything else
- *
- * Data surfaces are black ink on paper, which is the highest-contrast
- * combination available and the one a fraud analyst can read for eight hours.
- */
+   This console does exactly one interesting thing: it refuses to flag a group
+   on any single signal, and it flags one when several weak signals land on the
+   same set of accounts. A shared address is nothing. A shared address plus a
+   shared device plus a burst of returns inside eight hours is something. The
+   whole product is the arithmetic of stacking weak evidence.
 
-@theme {
-  --color-paper: #f2efe4;
-  --color-paper-bright: #faf8f1;
-  --color-paper-sunk: #e6e2d4;
-  --color-paper-edge: #d5d0be;
+   That arithmetic already has a physical form, and it is not a bar chart. It
+   is a sheet of film on a light box. One translucent film tints the light.
+   Three stacked films multiply their transmittances and go nearly black. The
+   darkness is not chosen — it falls out of the compositing.
 
-  --color-ink: #16141c;
-  --color-ink-soft: #45414f;
-  --color-ink-faint: #7d7889;
+   So the ground here is a backlit near-white diffuser, slightly cool, with a
+   falloff at the edges, and every piece of evidence is a translucent process
+   film laid on it. `mix-blend-mode: multiply` does the stacking for real: the
+   composite colour on the cluster detail page is not a hand-picked value per
+   risk band, it is what the browser gets when it multiplies the films the
+   detector actually produced.
 
-  --color-magenta: #e5006d;
-  --color-magenta-soft: #ff4d9b;
-  --color-cyan: #00a9c8;
-  --color-cyan-soft: #4fd6ec;
-  --color-amber: #e08700;
-  --color-clear: #1f8a53;
-  --color-violet: #6d28d9;
+   THE DENSITY IS THE SCORE, AND THAT IS NOT A METAPHOR
+   ---------------------------------------------------
+   Optical density D = -log10(T), where T is the fraction of light a film
+   passes. Stacked films ADD their densities. Risk points also add. The two
+   arithmetics are the same arithmetic, so the stack can carry the score with
+   no lookup table and no tuned constant:
 
-  --font-web: var(--font-public), ui-sans-serif, system-ui, sans-serif;
-  --font-title: var(--font-bungee), ui-sans-serif, system-ui, sans-serif;
-  --font-strand: var(--font-mono-web), ui-monospace, "SF Mono", Menlo, monospace;
+       D(signal) = points / 100          a signal worth 18 points is D 0.18
+       T(signal) = 10^(-D)               its transmittance
+       alpha     = 1 - T                 what CSS needs for the film
 
-  /* ------------------------------------------------------------------ */
-  /* The old dark-mode names, repointed at the print palette.            */
-  /* ------------------------------------------------------------------ */
-  /*
-   * The console was built against a dark palette whose token names are used in
-   * about a hundred and fifty places. Renaming every reference would touch every
-   * file to change nothing but a string, so the names stay and the VALUES move.
-   *
-   * The mapping inverts the surface: what was the darkest ground is now paper,
-   * and what was the lightest text is now ink. Every existing component
-   * therefore reads correctly on the new ground without being edited, and the
-   * pages being redesigned use the new names directly.
-   */
-  --color-web-void: var(--color-paper);
-  --color-web-base: var(--color-paper);
-  --color-web-panel: var(--color-paper-bright);
-  --color-web-raised: var(--color-paper-sunk);
-  --color-web-line: var(--color-paper-edge);
-  --color-web-line-bright: var(--color-ink-faint);
+   Stack them and the composite passes 10^(-risk/100) of the light. Risk 87
+   leaves 13.5% through. The only judgement in that chain is the decision that
+   100 points equals density 1.0 — one decade of light — and it is stated on
+   the page next to the number.
 
-  --color-chalk: var(--color-ink);
-  --color-chalk-dim: var(--color-ink-soft);
-  --color-chalk-faint: var(--color-ink-faint);
+   THE COUNTER-SIGNALS GET THEIR OWN STACK, BESIDE THE FIRST
+   --------------------------------------------------------
+   This project leads with what it does not establish. Subtractive colour is
+   the only visual system that can make that argument honestly, because a
+   second set of films — shared housing, a household tablet, a post-sale
+   returns burst — produces its own darkness over the same accounts. The
+   cluster detail page draws both stacks side by side over the same field of
+   account marks. When the right-hand patch is as dark as the left, the reader
+   is looking at a detector that cannot separate the two readings, and the page
+   says so in those words.
 
-  --color-strand: var(--color-magenta);
-  --color-strand-deep: var(--color-magenta);
-  --color-strand-glow: var(--color-magenta-soft);
+   COLOUR IS STATE, AND THE STATES ARE THE SUBTRACTIVE PRIMARIES AND SECONDARIES
+   ----------------------------------------------------------------------------
+     CYAN        structural evidence — shared infrastructure, observed
+     MAGENTA     behavioural evidence — rates, timing, velocity
+     YELLOW      concentration evidence — narrow categories, narrow value
+     GREEN  (C+Y) no coordination indicated
+     BLUE   (C+M) the detector declined to decide; a person has it
 
-  --color-node: var(--color-cyan);
-  --color-node-deep: var(--color-cyan);
+   The last two are literal: green is what cyan and yellow film make when you
+   lay them over each other, blue is what cyan and magenta make. Nothing in the
+   palette is arbitrary, and there is no red and no word for guilt anywhere.
 
-  --color-state-likely: var(--color-magenta);
-  --color-state-possible: var(--color-amber);
-  --color-state-clear: var(--color-clear);
-  --color-state-unknown: var(--color-violet);
-}
-
+   Data surfaces stay near-black on white. The output of this system is a
+   decision to investigate real people, and it has to survive being read for
+   eight hours and being read under scrutiny.
+   ========================================================================== */
 
 :root {
   color-scheme: light;
+
+  /* The light box itself: a cool diffuser, hot near the top, falling off. */
+  --lb-white: #ffffff;
+  --lb-base: #f4f8fa;
+  --lb-dim: #e7eef3;
+  --lb-edge: #d5dfe7;
+
+  /* Sheets laid on the box. */
+  --sheet: #ffffff;
+  --sheet-2: #f2f6f9;
+  --rule: #cbd6de;
+  --rule-soft: #e4ebf0;
+
+  /* Ink. Near-black, faintly blue, never pure #000. */
+  --ink: #10161b;
+  --ink-2: #47555f;
+  --ink-3: #7b8b96;
+
+  /* Process films. These are the fill colours, used translucent and
+     multiplied. They are not text colours — see the -t pair below. */
+  --film-c: #00aeef;
+  --film-m: #ec008c;
+  --film-y: #ffe800;
+
+  /* The same four hues at a density that survives as 12px text on white. */
+  --ink-c: #00738f;
+  --ink-m: #bf0072;
+  --ink-y: #8a6800;
+  --ink-g: #0d7145; /* cyan over yellow */
+  --ink-b: #4436c4; /* cyan over magenta */
+
+  --type-sans: var(--font-archivo), ui-sans-serif, system-ui, sans-serif;
+  --type-mono: var(--font-mono), ui-monospace, "SF Mono", Menlo, monospace;
 }
 
-html {
-  background: var(--color-paper);
-  scroll-behavior: smooth;
+@layer base {
+  html {
+    background: var(--lb-dim);
+    overflow-x: clip;
+  }
+
+  body {
+    color: var(--ink);
+    font-family: var(--type-sans);
+    -webkit-font-smoothing: antialiased;
+    /* Backlit, not flat white: hot above the fold, falling off to the edges,
+       over the fine scan of an opal diffuser. */
+    background-image:
+      repeating-linear-gradient(
+        0deg,
+        rgba(16, 22, 27, 0.016) 0 1px,
+        rgba(255, 255, 255, 0) 1px 3px
+      ),
+      radial-gradient(
+        150% 105% at 50% -12%,
+        var(--lb-white) 0%,
+        #f8fbfc 26%,
+        var(--lb-base) 48%,
+        var(--lb-dim) 76%,
+        var(--lb-edge) 100%
+      );
+    background-attachment: fixed, fixed;
+    /*
+     * The page never scrolls sideways; wide content scrolls inside .scroll-x.
+     * `clip` rather than `hidden` on purpose: `overflow-x: hidden` makes the
+     * body a scroll container, which silently breaks `position: sticky` on the
+     * masthead. `clip` cuts the overflow without creating one.
+     */
+    overflow-x: clip;
+  }
+
+  ::selection {
+    background: var(--film-y);
+    color: var(--ink);
+  }
+
+  :where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
+    outline: 2px solid var(--ink-m);
+    outline-offset: 2px;
+  }
+
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--rule) transparent;
+  }
+  *::-webkit-scrollbar {
+    height: 9px;
+    width: 9px;
+  }
+  *::-webkit-scrollbar-thumb {
+    background: var(--rule);
+  }
+  *::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  /*
+   * TEXT SAFETY, APPLIED ONCE RATHER THAN REMEMBERED PER COMPONENT.
+   *
+   * A flex or grid child defaults to min-width:auto, which means it refuses to
+   * shrink below its content and shoves its neighbour off the screen. That is
+   * the single most common way a page like this breaks. Zero specificity, so
+   * any component that genuinely needs min-content sizing can override it.
+   */
+  :where(.flex, .grid) > * {
+    min-width: 0;
+  }
 }
 
-body {
-  background: var(--color-paper);
-  color: var(--color-ink);
-  font-family: var(--font-web);
-  -webkit-font-smoothing: antialiased;
-  /* The paper grain: a fine halftone, always present, never animated. */
-  background-image: radial-gradient(var(--color-paper-edge) 0.6px, transparent 0.6px);
-  background-size: 4px 4px;
+@layer components {
+  /* ---------------------------------------------------------------- TYPE -- */
+
+  .dsp {
+    font-family: var(--type-sans);
+    font-weight: 700;
+    letter-spacing: -0.018em;
+    line-height: 1.02;
+    text-transform: uppercase;
+  }
+
+  /* Control-strip labels. Tracked out, but with trailing space added back so
+     the last letter cannot clip against its container. */
+  .cap {
+    font-family: var(--type-sans);
+    font-size: 0.625rem;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    padding-right: 0.14em;
+    display: inline-block;
+  }
+
+  .mono {
+    font-family: var(--type-mono);
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Figures in a column. Never wraps, always aligns. */
+  .num {
+    font-family: var(--type-mono);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+
+  /* Identifiers, hashes, correlation keys. A 24-character id must never be
+     allowed to set the width of a table. */
+  .id {
+    font-family: var(--type-mono);
+    font-size: 0.6875rem;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
+
+  .lede {
+    font-size: 0.875rem;
+    line-height: 1.72;
+    color: var(--ink-2);
+  }
+
+  .note {
+    font-size: 0.75rem;
+    line-height: 1.7;
+    color: var(--ink-2);
+  }
+
+  .note-s {
+    font-size: 0.6875rem;
+    line-height: 1.66;
+    color: var(--ink-3);
+  }
+
+  .t-ink {
+    color: var(--ink);
+  }
+  .t-2 {
+    color: var(--ink-2);
+  }
+  .t-3 {
+    color: var(--ink-3);
+  }
+  .t-c {
+    color: var(--ink-c);
+  }
+  .t-m {
+    color: var(--ink-m);
+  }
+  .t-y {
+    color: var(--ink-y);
+  }
+  .t-g {
+    color: var(--ink-g);
+  }
+  .t-b {
+    color: var(--ink-b);
+  }
+
+  /* --------------------------------------------------------- STRUCTURE -- */
+
+  /* A sheet lying on the light box. Almost no shadow — a sheet on a lit
+     diffuser is edge-lit, not floating — but a definite cool edge. */
+  .sheet {
+    background: var(--sheet);
+    border: 1px solid var(--rule);
+    position: relative;
+    box-shadow: 0 1px 0 rgba(16, 22, 27, 0.04);
+  }
+
+  .sheet-hd {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.85rem 1.15rem;
+    border-bottom: 1px solid var(--rule-soft);
+  }
+
+  .sheet-ti {
+    font-size: 0.8125rem;
+    font-weight: 700;
+    letter-spacing: 0.01em;
+    color: var(--ink);
+  }
+
+  .sheet-bd {
+    padding: 1.15rem;
+  }
+
+  /* Crop corners, at the trim edge of a sheet. Eight hairlines, no image. */
+  .marks::after {
+    content: "";
+    position: absolute;
+    inset: -8px;
+    pointer-events: none;
+    background:
+      linear-gradient(var(--rule), var(--rule)) 0 0 / 11px 1px no-repeat,
+      linear-gradient(var(--rule), var(--rule)) 0 0 / 1px 11px no-repeat,
+      linear-gradient(var(--rule), var(--rule)) 100% 0 / 11px 1px no-repeat,
+      linear-gradient(var(--rule), var(--rule)) 100% 0 / 1px 11px no-repeat,
+      linear-gradient(var(--rule), var(--rule)) 0 100% / 11px 1px no-repeat,
+      linear-gradient(var(--rule), var(--rule)) 0 100% / 1px 11px no-repeat,
+      linear-gradient(var(--rule), var(--rule)) 100% 100% / 11px 1px no-repeat,
+      linear-gradient(var(--rule), var(--rule)) 100% 100% / 1px 11px no-repeat;
+  }
+
+  /* The plate-maker's registration target. */
+  .reg {
+    display: inline-block;
+    position: relative;
+    width: 12px;
+    height: 12px;
+    border: 1px solid currentColor;
+    border-radius: 50%;
+    flex: none;
+  }
+  .reg::before,
+  .reg::after {
+    content: "";
+    position: absolute;
+    background: currentColor;
+  }
+  .reg::before {
+    left: 50%;
+    top: -4px;
+    bottom: -4px;
+    width: 1px;
+    transform: translateX(-0.5px);
+  }
+  .reg::after {
+    top: 50%;
+    left: -4px;
+    right: -4px;
+    height: 1px;
+    transform: translateY(-0.5px);
+  }
+
+  /* The prepress control strip: process patches in a row. Used as a rule, so
+     every horizontal division on the page is a colour bar. */
+  .strip {
+    height: 3px;
+    background: linear-gradient(
+      90deg,
+      var(--film-c) 0 14%,
+      var(--film-m) 14% 28%,
+      var(--film-y) 28% 42%,
+      var(--ink) 42% 50%,
+      var(--rule-soft) 50% 100%
+    );
+  }
+
+  .rule-x {
+    border-top: 1px solid var(--rule-soft);
+  }
+
+  /* Wide content scrolls here so the page body never does. */
+  .scroll-x {
+    overflow-x: auto;
+    max-width: 100%;
+  }
+
+  /* --------------------------------------------------------- MASTHEAD --- */
+
+  .masthead {
+    background: rgba(255, 255, 255, 0.86);
+    backdrop-filter: saturate(1.1) blur(6px);
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .wordmark {
+    font-family: var(--type-sans);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    text-transform: uppercase;
+    color: var(--ink);
+    line-height: 1;
+  }
+
+  .tab {
+    font-family: var(--type-sans);
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 0.34rem 0.62rem;
+    color: var(--ink-2);
+    border: 1px solid transparent;
+    white-space: nowrap;
+    transition: color 110ms ease, background-color 110ms ease;
+  }
+  .tab:hover {
+    color: var(--ink);
+    background: var(--sheet-2);
+  }
+  /* The current section is a film laid on the tab — the same mechanism as
+     everything else on the page, at its smallest scale. */
+  .tab[aria-current="page"] {
+    color: var(--ink);
+    background: color-mix(in srgb, var(--film-y) 42%, transparent);
+    border-color: color-mix(in srgb, var(--ink-y) 32%, transparent);
+  }
+
+  /* ------------------------------------------------------------- TAGS --- */
+
+  .tag {
+    font-family: var(--type-mono);
+    font-size: 0.625rem;
+    font-weight: 500;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    padding: 0.15rem 0.42rem 0.15rem 0.44rem;
+    border: 1px solid currentColor;
+    display: inline-block;
+    white-space: nowrap;
+    line-height: 1.35;
+  }
+
+  .tag-c {
+    color: var(--ink-c);
+    background: color-mix(in srgb, var(--film-c) 12%, transparent);
+  }
+  .tag-m {
+    color: var(--ink-m);
+    background: color-mix(in srgb, var(--film-m) 10%, transparent);
+  }
+  .tag-y {
+    color: var(--ink-y);
+    background: color-mix(in srgb, var(--film-y) 30%, transparent);
+  }
+  .tag-g {
+    color: var(--ink-g);
+    background: color-mix(in srgb, var(--ink-g) 8%, transparent);
+  }
+  .tag-b {
+    color: var(--ink-b);
+    background: color-mix(in srgb, var(--ink-b) 8%, transparent);
+  }
+  .tag-n {
+    color: var(--ink-3);
+    background: transparent;
+  }
+
+  /* ------------------------------------------------------------ TABLE --- */
+
+  .tbl {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.8125rem;
+  }
+
+  .tbl thead th {
+    font-family: var(--type-sans);
+    font-size: 0.5938rem;
+    font-weight: 700;
+    letter-spacing: 0.13em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    text-align: left;
+    padding: 0.5rem 0.7rem;
+    border-bottom: 1px solid var(--ink);
+    white-space: nowrap;
+    background: var(--sheet);
+  }
+
+  .tbl tbody td {
+    padding: 0.55rem 0.7rem;
+    border-bottom: 1px solid var(--rule-soft);
+    vertical-align: top;
+    color: var(--ink-2);
+  }
+
+  .tbl tbody tr:hover {
+    background: color-mix(in srgb, var(--film-y) 13%, transparent);
+  }
+
+  .tbl tbody tr:last-child td {
+    border-bottom: 0;
+  }
+
+  /* ------------------------------------------------------------ METER --- */
+
+  /* A fixed 0–100 track, so two scores are visually comparable. */
+  .meter {
+    height: 6px;
+    background: var(--sheet-2);
+    border: 1px solid var(--rule-soft);
+    position: relative;
+    overflow: hidden;
+  }
+  .meter > span {
+    display: block;
+    height: 100%;
+  }
+  .meter-mark {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    background: var(--ink);
+  }
+
+  /* --------------------------------------------------------- CONTROLS --- */
+
+  .btn {
+    font-family: var(--type-sans);
+    font-size: 0.6875rem;
+    font-weight: 700;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    padding: 0.5rem 0.95rem;
+    background: var(--ink-m);
+    color: #fff;
+    border: 1px solid var(--ink-m);
+    cursor: pointer;
+    transition: background-color 110ms ease, color 110ms ease;
+  }
+  .btn:hover:not(:disabled) {
+    background: var(--ink);
+    border-color: var(--ink);
+  }
+  .btn:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+  }
+
+  .btn-ghost {
+    background: var(--sheet);
+    color: var(--ink);
+    border: 1px solid var(--rule);
+  }
+  .btn-ghost:hover:not(:disabled) {
+    background: var(--sheet-2);
+    color: var(--ink);
+    border-color: var(--ink);
+  }
+
+  .field {
+    font-family: var(--type-mono);
+    font-size: 0.75rem;
+    width: 100%;
+    background: var(--sheet-2);
+    border: 1px solid var(--rule);
+    color: var(--ink);
+    padding: 0.5rem 0.6rem;
+    outline: none;
+  }
+  .field:focus {
+    border-color: var(--ink-m);
+    background: var(--sheet);
+  }
+
+  /* -------------------------------------------------------- THE STACK --- */
+  /*
+   * The signature. Films laid over the same field of account marks, composited
+   * with multiply. `isolation: isolate` scopes the blend to the window, so the
+   * films multiply against the star field and each other rather than against
+   * the whole page.
+   */
+
+  .stack-win {
+    position: relative;
+    isolation: isolate;
+    background: var(--lb-white);
+    border: 1px solid var(--rule);
+    aspect-ratio: 4 / 3;
+    overflow: hidden;
+  }
+
+  .stack-film {
+    position: absolute;
+    inset: 0;
+    mix-blend-mode: multiply;
+  }
+
+  /* A single film drawn apart from the stack, carrying its own observation. */
+  .film-row {
+    position: relative;
+    border: 1px solid var(--rule-soft);
+    padding: 0.6rem 0.75rem;
+    background: var(--sheet);
+  }
+  .film-row::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    mix-blend-mode: multiply;
+    pointer-events: none;
+    background: var(--film-tint, transparent);
+  }
+  .film-row > * {
+    position: relative;
+  }
+
+  /* The strip of film colour down the left edge, at full strength, so the
+     reader can identify the film even when its tint is nearly clear. */
+  .film-edge {
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    background: var(--film-edge-colour, var(--rule));
+  }
+
+  /* ------------------------------------------------------------ GRAPH --- */
+
+  .g-node {
+    cursor: pointer;
+    transition: stroke-width 120ms ease;
+  }
+  .g-node:hover {
+    stroke-width: 3;
+  }
+
+  .g-edge {
+    transition: stroke-opacity 120ms ease, stroke-width 120ms ease;
+  }
+  .g-edge:hover {
+    stroke-width: 3;
+    stroke-opacity: 1;
+  }
+
+  /* An inferred edge is drawn dashed everywhere, without exception. It is a
+     conclusion this system drew rather than something an event asserted, and
+     the two must never look the same. */
+  .g-derived {
+    stroke-dasharray: 5 4;
+  }
+
+  /* ------------------------------------------------------ HERO FILMS --- */
+
+  /*
+   * The one moment of motion on the landing page: three films settling into
+   * register. Pure CSS on three divs, `both` fill so the end state is the
+   * resting state, and cancelled entirely under reduced motion — where the
+   * films are simply already in place rather than invisible.
+   */
+  .film-settle {
+    animation: film-settle 620ms cubic-bezier(0.2, 0.8, 0.3, 1) both;
+  }
+
+  /* ------------------------------------------------------------ EMPTY --- */
+
+  .empty {
+    border: 1px dashed var(--rule);
+    background: var(--sheet-2);
+    padding: 2.25rem 1.5rem;
+    text-align: center;
+  }
 }
 
-::selection {
-  background: var(--color-strand);
-  color: #fff;
+/* ==========================================================================
+   THE CURTAIN
+   ==========================================================================
+   Two sheets of film sliding apart off the light box. They start meeting in
+   the centre with a deliberate overlap, so the seam is the dark patch that
+   cyan over magenta makes, and the transition begins by splitting exactly the
+   thing the product is about.
+
+   The panels are OFF-SCREEN at rest. Their base transform puts them there and
+   the animation runs from on-screen back to that base, so a page sitting still
+   has nothing covering it. The container is pointer-events: none permanently —
+   a curtain that swallows a click is worse than no curtain at all.
+   ========================================================================== */
+
+.curtain {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  pointer-events: none;
+  overflow: hidden;
 }
 
-/* ---------------------------------------------------------------------- */
-/* Surfaces                                                               */
-/* ---------------------------------------------------------------------- */
-
-.web-panel {
-  background: linear-gradient(
-    165deg,
-    color-mix(in oklab, var(--color-web-panel) 93%, white 7%),
-    var(--color-web-panel)
-  );
-  border: 1px solid var(--color-web-line);
-  position: relative;
-}
-
-.web-clip {
-  clip-path: polygon(12px 0, 100% 0, 100% calc(100% - 12px), calc(100% - 12px) 100%, 0 100%, 0 12px);
-}
-
-.web-strand {
-  font-family: var(--font-strand);
-  font-variant-numeric: tabular-nums;
-  letter-spacing: -0.01em;
-}
-
-.web-label {
-  font-family: var(--font-strand);
-  font-size: 0.6875rem;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  color: var(--color-chalk-faint);
-}
-
-.web-stamp {
-  font-family: var(--font-strand);
-  font-size: 0.625rem;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  border: 1px solid currentColor;
-  padding: 0.1rem 0.4rem;
-  display: inline-block;
-  white-space: nowrap;
-}
-
-/* Chromatic offset on a heading — the Spider-Verse print artefact, done in
-   two text-shadows rather than three stacked DOM nodes. */
-.web-offset {
-  text-shadow:
-    2px 0 0 color-mix(in oklab, var(--color-node) 55%, transparent),
-    -2px 0 0 color-mix(in oklab, var(--color-strand) 55%, transparent);
-}
-
-.web-rule {
-  position: relative;
-}
-.web-rule::after {
-  content: "";
+.curtain-panel {
   position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 54%;
+  mix-blend-mode: multiply;
+  will-change: transform;
+}
+
+.curtain-l {
   left: 0;
-  bottom: -6px;
-  width: 48px;
-  height: 2px;
-  background: linear-gradient(90deg, var(--color-strand), var(--color-node));
+  background: var(--film-c);
+  border-right: 1px solid var(--ink);
+  transform: translate3d(-101%, 0, 0);
+  animation: curtain-part-l 420ms cubic-bezier(0.62, 0.02, 0.2, 1) forwards;
 }
 
-/* ---------------------------------------------------------------------- */
-/* Halftone                                                               */
-/* ---------------------------------------------------------------------- */
-
-/*
- * Everything below is CSS gradients and transforms. No image, no video, no
- * WebGL, no third-party request. A product arguing for auditability should not
- * need a CDN to draw its own landing page.
- */
-
-.halftone {
-  background-image:
-    radial-gradient(circle at center, color-mix(in oklab, var(--color-strand) 60%, transparent) 1px, transparent 1.7px),
-    radial-gradient(circle at center, color-mix(in oklab, var(--color-node) 40%, transparent) 1px, transparent 1.7px);
-  background-size: 13px 13px, 19px 19px;
-  background-position: 0 0, 6px 9px;
+.curtain-r {
+  right: 0;
+  background: var(--film-m);
+  border-left: 1px solid var(--ink);
+  transform: translate3d(101%, 0, 0);
+  animation: curtain-part-r 420ms cubic-bezier(0.62, 0.02, 0.2, 1) forwards;
 }
 
-@keyframes halftone-drift {
-  from {
-    background-position: 0 0, 6px 9px;
-  }
-  to {
-    background-position: 26px 39px, 44px 47px;
-  }
-}
-
-.halftone-drift {
-  animation: halftone-drift 18s linear infinite;
-}
-
-@keyframes strand-draw {
-  from {
-    stroke-dashoffset: var(--strand-length, 300);
-  }
-  to {
-    stroke-dashoffset: 0;
-  }
-}
-
-.strand-draw {
-  stroke-dasharray: var(--strand-length, 300);
-  animation: strand-draw var(--strand-dur, 1.6s) cubic-bezier(0.16, 1, 0.3, 1) both;
-  animation-delay: var(--strand-delay, 0s);
-}
-
-@keyframes node-pop {
+@keyframes curtain-part-l {
   0% {
-    transform: scale(0);
+    transform: translate3d(0, 0, 0);
+  }
+  18% {
+    transform: translate3d(0, 0, 0);
+  }
+  100% {
+    transform: translate3d(-101%, 0, 0);
+  }
+}
+
+@keyframes curtain-part-r {
+  0% {
+    transform: translate3d(0, 0, 0);
+  }
+  18% {
+    transform: translate3d(0, 0, 0);
+  }
+  100% {
+    transform: translate3d(101%, 0, 0);
+  }
+}
+
+@keyframes film-settle {
+  from {
+    transform: translate3d(-6%, -5%, 0) scale(0.97);
     opacity: 0;
   }
-  70% {
-    transform: scale(1.25);
-    opacity: 1;
-  }
-  100% {
-    transform: scale(1);
-    opacity: 1;
-  }
-}
-
-.node-pop {
-  animation: node-pop 0.5s cubic-bezier(0.22, 1.4, 0.36, 1) both;
-  animation-delay: var(--node-delay, 0s);
-  transform-origin: center;
-}
-
-@keyframes pulse-strand {
-  0%,
-  100% {
-    opacity: 0.45;
-  }
-  50% {
-    opacity: 1;
-  }
-}
-
-.pulse-strand {
-  animation: pulse-strand 2.6s ease-in-out infinite;
-}
-
-@keyframes marquee-slide {
-  from {
-    transform: translateX(0);
-  }
   to {
-    transform: translateX(-50%);
-  }
-}
-
-.marquee-track {
-  animation: marquee-slide 36s linear infinite;
-}
-
-/* ---------------------------------------------------------------------- */
-/* Data surfaces — legibility is not negotiable                           */
-/* ---------------------------------------------------------------------- */
-
-.web-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 0.8125rem;
-}
-
-.web-table thead th {
-  font-family: var(--font-strand);
-  font-size: 0.625rem;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--color-chalk-faint);
-  text-align: left;
-  padding: 0.55rem 0.75rem;
-  border-bottom: 1px solid var(--color-web-line);
-  white-space: nowrap;
-}
-
-.web-table tbody td {
-  padding: 0.6rem 0.75rem;
-  border-bottom: 1px solid color-mix(in oklab, var(--color-web-line) 60%, transparent);
-  vertical-align: top;
-}
-
-.web-table tbody tr:hover {
-  background: color-mix(in oklab, var(--color-strand) 6%, transparent);
-}
-
-.web-bar {
-  height: 5px;
-  background: var(--color-web-raised);
-  overflow: hidden;
-}
-.web-bar > span {
-  display: block;
-  height: 100%;
-}
-
-/* Signal bar: a filled portion of a fixed maximum, so the reader sees both the
-   points scored and the points available. */
-.signal-bar {
-  height: 8px;
-  background: var(--color-web-raised);
-  position: relative;
-  overflow: hidden;
-}
-.signal-bar > span {
-  display: block;
-  height: 100%;
-  background: linear-gradient(90deg, var(--color-strand-deep), var(--color-strand));
-}
-
-:where(a, button, input, select, textarea, [tabindex]):focus-visible {
-  outline: 2px solid var(--color-node);
-  outline-offset: 2px;
-}
-
-* {
-  scrollbar-width: thin;
-  scrollbar-color: var(--color-web-line-bright) transparent;
-}
-*::-webkit-scrollbar {
-  height: 9px;
-  width: 9px;
-}
-*::-webkit-scrollbar-thumb {
-  background: var(--color-web-line-bright);
-}
-*::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-/* ---------------------------------------------------------------------- */
-/* Graph canvas                                                           */
-/* ---------------------------------------------------------------------- */
-
-.graph-node {
-  cursor: pointer;
-  transition: r 120ms ease, stroke-width 120ms ease;
-}
-.graph-node:hover {
-  stroke-width: 3;
-}
-
-.graph-edge {
-  transition: stroke-opacity 120ms ease, stroke-width 120ms ease;
-}
-.graph-edge:hover {
-  stroke-width: 3;
-  stroke-opacity: 1;
-}
-
-/* A derived edge is drawn dashed, everywhere, without exception: it is an
-   inference this system drew rather than something an event asserted, and the
-   two must never look the same. */
-.edge-derived {
-  stroke-dasharray: 5 4;
-}
-
-/* ---------------------------------------------------------------------- */
-/* Reduced motion                                                         */
-/* ---------------------------------------------------------------------- */
-
-@media (prefers-reduced-motion: reduce) {
-  html {
-    scroll-behavior: auto;
-  }
-  .halftone-drift,
-  .strand-draw,
-  .node-pop,
-  .pulse-strand,
-  .marquee-track {
-    animation: none !important;
-  }
-  /* End states must remain the visible ones, or content disappears. */
-  .strand-draw {
-    stroke-dashoffset: 0;
-  }
-  .node-pop {
     transform: none;
     opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .curtain-l,
+  .curtain-r,
+  .film-settle {
+    animation: none !important;
   }
   *,
   *::before,
   *::after {
     transition-duration: 0.01ms !important;
-  }
-}
-
-
-/* ==========================================================================
-   PRINT
-   ==========================================================================
-   Comic pages are panels with hard borders and generous gutters. That is the
-   whole layout system here: there is no sidebar and no card component, only
-   panels on a page.
-   ========================================================================== */
-
-.panel {
-  background: var(--color-paper-bright);
-  border: 2.5px solid var(--color-ink);
-  box-shadow: 4px 4px 0 var(--color-ink);
-  position: relative;
-}
-
-.panel-sunk {
-  background: var(--color-paper-sunk);
-  border: 2px solid var(--color-ink);
-}
-
-/* A panel that carries a finding. The colour is the state. */
-.panel-likely { border-color: var(--color-magenta); box-shadow: 4px 4px 0 var(--color-magenta); }
-.panel-derived { border-color: var(--color-cyan); box-shadow: 4px 4px 0 var(--color-cyan); }
-.panel-possible { border-color: var(--color-amber); box-shadow: 4px 4px 0 var(--color-amber); }
-
-/* The caption box in a comic panel's corner. */
-.caption {
-  display: inline-block;
-  background: var(--color-ink);
-  color: var(--color-paper-bright);
-  font-family: var(--font-title);
-  font-size: 0.625rem;
-  letter-spacing: 0.08em;
-  padding: 0.2rem 0.55rem;
-}
-
-.caption-magenta { background: var(--color-magenta); }
-.caption-cyan { background: var(--color-cyan); }
-.caption-amber { background: var(--color-amber); color: var(--color-ink); }
-
-/* Display type, printed three times: cyan and magenta plates a hair out of
-   register behind the black. This is the signature move and it is used on
-   headings only. */
-.misprint {
-  font-family: var(--font-title);
-  position: relative;
-  color: var(--color-ink);
-  text-shadow:
-    2px 2px 0 var(--color-cyan),
-    -2px -1px 0 var(--color-magenta);
-}
-
-.title {
-  font-family: var(--font-title);
-  letter-spacing: 0.01em;
-  line-height: 1.05;
-}
-
-.label {
-  font-family: var(--font-title);
-  font-size: 0.625rem;
-  letter-spacing: 0.12em;
-  color: var(--color-ink-faint);
-  text-transform: uppercase;
-}
-
-.strand {
-  font-family: var(--font-strand);
-  font-variant-numeric: tabular-nums;
-}
-
-/* Ben-Day dots, used behind hero areas only. */
-.benday {
-  background-image: radial-gradient(var(--color-magenta) 1.4px, transparent 1.4px);
-  background-size: 9px 9px;
-  opacity: 0.18;
-}
-
-.benday-cyan {
-  background-image: radial-gradient(var(--color-cyan) 1.4px, transparent 1.4px);
-  background-size: 9px 9px;
-  opacity: 0.16;
-}
-
-/* Tables: black ink on paper. */
-.web-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 0.8125rem;
-}
-
-.web-table thead th {
-  font-family: var(--font-title);
-  font-size: 0.5625rem;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--color-ink-faint);
-  text-align: left;
-  padding: 0.45rem 0.7rem;
-  border-bottom: 2px solid var(--color-ink);
-  white-space: nowrap;
-}
-
-.web-table tbody td {
-  padding: 0.55rem 0.7rem;
-  border-bottom: 1px solid var(--color-paper-edge);
-  vertical-align: top;
-}
-
-.web-table tbody tr:hover { background: var(--color-paper-sunk); }
-
-.web-scroll { overflow-x: auto; }
-
-/* Controls stamped like printed buttons. */
-.stamp-button {
-  font-family: var(--font-title);
-  font-size: 0.6875rem;
-  letter-spacing: 0.08em;
-  padding: 0.5rem 1rem;
-  border: 2.5px solid var(--color-ink);
-  background: var(--color-magenta);
-  color: var(--color-paper-bright);
-  box-shadow: 3px 3px 0 var(--color-ink);
-  cursor: pointer;
-  transition: transform 90ms ease, box-shadow 90ms ease;
-}
-
-.stamp-button:hover:not(:disabled) {
-  transform: translate(1px, 1px);
-  box-shadow: 2px 2px 0 var(--color-ink);
-}
-
-.stamp-button:active:not(:disabled) {
-  transform: translate(3px, 3px);
-  box-shadow: 0 0 0 var(--color-ink);
-}
-
-.stamp-button:disabled { opacity: 0.45; cursor: not-allowed; }
-
-.stamp-button-ghost {
-  background: var(--color-paper-bright);
-  color: var(--color-ink);
-}
-
-:focus-visible {
-  outline: 3px solid var(--color-magenta);
-  outline-offset: 2px;
-}
-
-/* The issue banner: the masthead strip that replaced the sidebar. */
-.issue-tab {
-  font-family: var(--font-title);
-  font-size: 0.625rem;
-  letter-spacing: 0.1em;
-  padding: 0.42rem 0.75rem;
-  border: 2px solid var(--color-ink);
-  background: var(--color-paper-bright);
-  color: var(--color-ink);
-  white-space: nowrap;
-}
-
-.issue-tab[aria-current="page"] {
-  background: var(--color-ink);
-  color: var(--color-paper-bright);
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .stamp-button,
-  .stamp-button:hover,
-  .stamp-button:active {
-    transform: none !important;
-    transition: none !important;
   }
 }

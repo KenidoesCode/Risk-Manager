@@ -10,7 +10,7 @@ import type {
   Slice,
   ThresholdOption,
 } from "@/evaluation/metrics";
-import { Empty, Heading, Metric, Panel, StateChip } from "@/ui/primitives";
+import { Empty, Heading, Metric, Sheet, StateChip } from "@/ui/primitives";
 
 export const dynamic = "force-dynamic";
 
@@ -66,7 +66,7 @@ export default async function EvaluationPage() {
     <>
       <Heading kicker="Check the detector">Evaluation</Heading>
 
-      <div className="mb-6 flex flex-wrap gap-2 text-[0.6875rem]">
+      <div className="mb-6 flex flex-wrap gap-1.5 text-[0.6875rem]">
         {[
           ["dataset", metrics?.datasetVersion],
           ["generator", metrics?.generatorVersion],
@@ -77,9 +77,8 @@ export default async function EvaluationPage() {
           ["accounts", String(latest?.accountCount ?? 0)],
           ["run at", latest?.finishedAt ?? "—"],
         ].map(([k, v]) => (
-          <span key={k as string} className="border border-[var(--color-web-line)] px-2.5 py-1">
-            <span className="web-label">{k}</span>{" "}
-            <span className="web-strand text-[var(--color-chalk-dim)]">{v as string}</span>
+          <span key={k as string} className="sheet px-2.5 py-1">
+            <span className="cap">{k}</span> <span className="num t-2">{v as string}</span>
           </span>
         ))}
       </div>
@@ -101,7 +100,7 @@ export default async function EvaluationPage() {
           <Metric
             label="Household false positives"
             value={metrics.ring.confusion.fp}
-            tone={metrics.ring.confusion.fp === 0 ? "clear" : "strand"}
+            tone={metrics.ring.confusion.fp === 0 ? "clear" : "behavioural"}
             hint="Benign groups flagged. Every one of these is a household investigated for living together."
           />
           <Metric
@@ -115,13 +114,13 @@ export default async function EvaluationPage() {
       )}
 
       {/* --------------------------------------------- COMPARISON --- */}
-      <Panel
+      <Sheet
         title="Graph detector vs account baseline"
         subtitle="Both scored at ring level on the same rings, with the same denominators."
         className="mt-6"
       >
-        <div className="overflow-x-auto">
-          <table className="web-table">
+        <div className="scroll-x">
+          <table className="tbl">
             <thead>
               <tr>
                 <th>Metric</th>
@@ -141,67 +140,64 @@ export default async function EvaluationPage() {
                 ] as Array<[string, (m: PerformanceMetrics) => string]>
               ).map(([label, fn]) => (
                 <tr key={label}>
-                  <td className="text-xs text-[var(--color-chalk-dim)]">{label}</td>
-                  <td className="web-strand text-xs text-[var(--color-chalk)]">
-                    {metrics?.ring ? fn(metrics.ring) : "—"}
-                  </td>
-                  <td className="web-strand text-xs text-[var(--color-chalk-dim)]">
-                    {metrics?.baselineRing ? fn(metrics.baselineRing) : "—"}
-                  </td>
+                  <td className="text-xs t-2">{label}</td>
+                  <td className="num text-xs t-ink">{metrics?.ring ? fn(metrics.ring) : "—"}</td>
+                  <td className="num text-xs t-2">{metrics?.baselineRing ? fn(metrics.baselineRing) : "—"}</td>
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
 
-        <p className="mt-4 max-w-3xl text-xs leading-relaxed text-[var(--color-chalk-faint)]">
+        <p className="note mt-4 max-w-3xl">
           The baseline is tuned on the same split with the same cost ratio, so this compares two
           tuned detectors rather than a tuned one against a straw man. Where the baseline wins, this
           table says so.
         </p>
-      </Panel>
+      </Sheet>
 
       {/* ------------------------------------------------ RECOVERY -- */}
       {recovery && (
-        <Panel
+        <Sheet
           title="Coordination recovery"
           subtitle="The product's central claim, measured — and able to falsify it."
           className="mt-5"
         >
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             <div>
-              <p className="web-label">Suspicious rings</p>
-              <p className="web-strand mt-1 text-lg">{recovery.suspiciousRings}</p>
+              <p className="cap">Suspicious rings</p>
+              <p className="num mt-1 text-lg">{recovery.suspiciousRings}</p>
             </div>
             <div>
-              <p className="web-label">Missed by the baseline</p>
-              <p className="web-strand mt-1 text-lg">{recovery.baselineMissed}</p>
+              <p className="cap">Missed by the baseline</p>
+              <p className="num mt-1 text-lg">{recovery.baselineMissed}</p>
             </div>
             <div>
-              <p className="web-label">Recovered by the graph</p>
-              <p className="web-strand mt-1 text-lg text-[var(--color-strand)]">{recovery.graphRecovered}</p>
+              <p className="cap">Recovered by the graph</p>
+              <p className="num mt-1 text-lg t-m">{recovery.graphRecovered}</p>
             </div>
             <div>
-              <p className="web-label">Recovery rate</p>
-              <p className="web-strand mt-1 text-lg">{ratio(recovery.recoveryRate)}</p>
+              <p className="cap">Recovery rate</p>
+              <p className="num mt-1 text-lg">{ratio(recovery.recoveryRate)}</p>
             </div>
           </div>
 
-          <p className="mt-4 text-xs leading-relaxed text-[var(--color-chalk-dim)]">
+          <p className="note mt-4 max-w-3xl">
             {recovery.baselineMissed === 0
               ? "The account baseline caught every suspicious ring in this split, so there was nothing for the graph to recover. That is an honest negative result for the recall half of the thesis — and the comparison table above shows where the graph earns its place instead: on precision, and specifically on not flagging households."
               : `Of the ${recovery.baselineMissed} ring(s) the account baseline missed, the graph found ${recovery.graphRecovered}.`}
           </p>
 
-          <p className="mt-2 text-[0.6875rem] leading-relaxed text-[var(--color-chalk-faint)]">
+          <p className="note-s mt-2 max-w-3xl">
             Reported alongside, because a recovery rate quoted without the cases going the other way
             is a half-truth: the graph missed{" "}
-            <span className="web-strand">{recovery.graphMissedBaselineCaught}</span> ring(s) that the
+            <span className="num">{recovery.graphMissedBaselineCaught}</span> ring(s) that the
             baseline caught.
           </p>
 
           {recovery.byTemplate.length > 0 && (
-            <table className="web-table mt-4">
+            <div className="scroll-x mt-4">
+              <table className="tbl">
               <thead>
                 <tr>
                   <th>Template the baseline missed</th>
@@ -212,19 +208,20 @@ export default async function EvaluationPage() {
               <tbody>
                 {recovery.byTemplate.map((t) => (
                   <tr key={t.template}>
-                    <td className="text-xs text-[var(--color-chalk-dim)]">{t.template.replace(/_/g, " ")}</td>
-                    <td className="web-strand text-xs">{t.missed}</td>
-                    <td className="web-strand text-xs text-[var(--color-strand)]">{t.recovered}</td>
+                    <td className="text-xs t-2">{t.template.replace(/_/g, " ")}</td>
+                    <td className="num text-xs">{t.missed}</td>
+                    <td className="num text-xs t-m">{t.recovered}</td>
                   </tr>
                 ))}
-              </tbody>
-            </table>
+                </tbody>
+              </table>
+            </div>
           )}
-        </Panel>
+        </Sheet>
       )}
 
       {/* ------------------------------------------ HARD NEGATIVES -- */}
-      <Panel
+      <Sheet
         title="Hard negatives, per template"
         subtitle="Never averaged into one figure — an aggregate 4% can hide 30% on families."
         className="mt-5"
@@ -232,8 +229,8 @@ export default async function EvaluationPage() {
         {hardNegatives.length === 0 ? (
           <Empty title="No benign groups in this split." />
         ) : (
-          <div className="overflow-x-auto">
-            <table className="web-table">
+          <div className="scroll-x">
+            <table className="tbl">
               <thead>
                 <tr>
                   <th>Template</th>
@@ -247,46 +244,40 @@ export default async function EvaluationPage() {
               <tbody>
                 {hardNegatives.map((h) => (
                   <tr key={h.template}>
-                    <td className="text-xs font-medium text-[var(--color-chalk)]">
-                      {h.template.replace(/_/g, " ")}
-                    </td>
-                    <td className="web-strand text-xs">{h.groups}</td>
-                    <td
-                      className={`web-strand text-xs ${h.falsePositives > 0 ? "text-[var(--color-strand)]" : "text-[var(--color-state-clear)]"}`}
-                    >
+                    <td className="text-xs font-semibold t-ink">{h.template.replace(/_/g, " ")}</td>
+                    <td className="num text-xs">{h.groups}</td>
+                    <td className={`num text-xs ${h.falsePositives > 0 ? "t-m" : "t-g"}`}>
                       {h.falsePositives}
                     </td>
-                    <td className="web-strand text-xs">{ratio(h.falsePositiveRate)}</td>
-                    <td className="web-strand text-xs text-[var(--color-chalk-dim)]">{h.meanRisk ?? "—"}</td>
-                    <td className="max-w-sm text-[0.6875rem] leading-relaxed text-[var(--color-chalk-faint)]">
-                      {h.description}
-                    </td>
+                    <td className="num text-xs">{ratio(h.falsePositiveRate)}</td>
+                    <td className="num text-xs t-2">{h.meanRisk ?? "—"}</td>
+                    <td className="note-s max-w-sm">{h.description}</td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
         )}
-      </Panel>
+      </Sheet>
 
       {/* ----------------------------------------------- THRESHOLD -- */}
       {sweep && (
-        <Panel
+        <Sheet
           title="Threshold sweep on held-out — diagnostic only"
           subtitle="The operating threshold came from the dev split. Taking the best row here would be fitting to the test set."
           className="mt-5"
         >
-          <p className="mb-3 text-[0.6875rem] leading-relaxed text-[var(--color-chalk-faint)]">
+          <p className="note-s mb-3 max-w-3xl">
             A false positive costs analyst time plus something this system cannot price: a household
             investigated for living together. The default ratio is{" "}
-            <span className="web-strand">
+            <span className="num">
               FP {sweep.costs.falsePositive} : FN {sweep.costs.falseNegative}
             </span>
             , weighted toward avoiding the false positive for that reason, and configurable because a
             business&rsquo;s real trade-off is not this system&rsquo;s to assume.
           </p>
-          <div className="overflow-x-auto">
-            <table className="web-table">
+          <div className="scroll-x">
+            <table className="tbl">
               <thead>
                 <tr>
                   <th>Risk</th>
@@ -304,35 +295,34 @@ export default async function EvaluationPage() {
                   return (
                     <tr
                       key={o.threshold}
-                      className={chosen ? "bg-[color-mix(in_oklab,var(--color-strand)_10%,transparent)]" : ""}
+                      className={chosen ? "bg-[color-mix(in_srgb,var(--film-y)_34%,transparent)]" : ""}
                     >
-                      <td className="web-strand text-xs">
+                      <td className="num text-xs">
                         {o.threshold}
-                        {chosen && <span className="ml-1.5 text-[var(--color-strand)]">◆ operating</span>}
+                        {chosen && <span className="ml-1.5 t-m">◆ operating</span>}
                       </td>
-                      <td className="web-strand text-xs">{pct(o.metrics.precision.value)}</td>
-                      <td className="web-strand text-xs">{pct(o.metrics.recall.value)}</td>
-                      <td className="web-strand text-xs">{o.metrics.confusion.fp}</td>
-                      <td className="web-strand text-xs">{o.metrics.confusion.fn}</td>
-                      <td
-                        className={`web-strand text-xs ${o.householdFalsePositives > 0 ? "text-[var(--color-strand)]" : "text-[var(--color-chalk-dim)]"}`}
-                      >
+                      <td className="num text-xs">{pct(o.metrics.precision.value)}</td>
+                      <td className="num text-xs">{pct(o.metrics.recall.value)}</td>
+                      <td className="num text-xs">{o.metrics.confusion.fp}</td>
+                      <td className="num text-xs">{o.metrics.confusion.fn}</td>
+                      <td className={`num text-xs ${o.householdFalsePositives > 0 ? "t-m" : "t-2"}`}>
                         {o.householdFalsePositives}
                       </td>
-                      <td className="web-strand text-xs">{o.totalCost}</td>
+                      <td className="num text-xs">{o.totalCost}</td>
                     </tr>
                   );
                 })}
               </tbody>
             </table>
           </div>
-        </Panel>
+        </Sheet>
       )}
 
       {/* -------------------------------------------------- SLICES -- */}
       <div className="mt-5 grid gap-5 lg:grid-cols-2">
-        <Panel title="By difficulty">
-          <table className="web-table">
+        <Sheet title="By difficulty">
+          <div className="scroll-x">
+            <table className="tbl">
             <thead>
               <tr>
                 <th>Difficulty</th>
@@ -347,64 +337,64 @@ export default async function EvaluationPage() {
                   <td>
                     <StateChip state={s.key} />
                   </td>
-                  <td className="web-strand text-xs">{s.count}</td>
-                  <td className="web-strand text-xs">{pct(s.metrics.precision.value)}</td>
-                  <td className="web-strand text-xs">{pct(s.metrics.recall.value)}</td>
+                  <td className="num text-xs">{s.count}</td>
+                  <td className="num text-xs">{pct(s.metrics.precision.value)}</td>
+                  <td className="num text-xs">{pct(s.metrics.recall.value)}</td>
                 </tr>
               ))}
             </tbody>
-          </table>
-          <p className="mt-3 text-[0.6875rem] leading-relaxed text-[var(--color-chalk-faint)]">
+            </table>
+          </div>
+          <p className="note-s mt-3 max-w-2xl">
             Difficulty is class convergence: at ADVERSARIAL a ring&rsquo;s behaviour is pulled 88% of
             the way toward an ordinary household&rsquo;s and a household&rsquo;s 60% toward a
             ring&rsquo;s, so the classes genuinely overlap.
           </p>
-        </Panel>
+        </Sheet>
 
-        <Panel title="Match quality" subtitle="How cleanly detected clusters mapped onto labelled rings.">
-          <dl className="space-y-3 text-xs">
+        <Sheet title="Match quality" subtitle="How cleanly detected clusters mapped onto labelled rings.">
+          <dl className="space-y-3">
             <div>
-              <dt className="web-label">Mean member overlap</dt>
-              <dd className="web-strand mt-0.5 text-lg text-[var(--color-chalk)]">
-                {metrics?.overlapDistribution?.mean ?? "—"}
-              </dd>
+              <dt className="cap">Mean member overlap</dt>
+              <dd className="num mt-0.5 text-lg t-ink">{metrics?.overlapDistribution?.mean ?? "—"}</dd>
             </div>
             <div>
-              <dt className="web-label">Minimum overlap among matched</dt>
-              <dd className="web-strand mt-0.5 text-[var(--color-chalk-dim)]">
+              <dt className="cap">Minimum overlap among matched</dt>
+              <dd className="num mt-0.5 text-sm t-2">
                 {metrics?.overlapDistribution?.min ?? "—"}
               </dd>
             </div>
             <div>
-              <dt className="web-label">Rings with no cluster above the 0.3 floor</dt>
-              <dd className="web-strand mt-0.5 text-[var(--color-chalk-dim)]">
+              <dt className="cap">Rings with no cluster above the 0.3 floor</dt>
+              <dd className="num mt-0.5 text-sm t-2">
                 {metrics?.overlapDistribution?.below ?? "—"}
               </dd>
             </div>
           </dl>
-          <p className="mt-4 text-[0.6875rem] leading-relaxed text-[var(--color-chalk-faint)]">
+          <p className="note-s mt-4 max-w-2xl">
             A ring is matched to the detected cluster with the highest Jaccard overlap of member
             accounts. Scoring only exact matches would report near-zero recall on a working detector;
             crediting any overlap at all would reward one that swept the whole graph into a single
             cluster. The distribution is published so the reader can judge the matching rather than
             take the headline number on trust.
           </p>
-        </Panel>
+        </Sheet>
       </div>
 
       {!metrics?.explainerConfigured && (
-        <Panel title="Explainer" className="mt-5">
-          <p className="text-xs leading-relaxed text-[var(--color-chalk-dim)]">
+        <Sheet title="Explainer" className="mt-5">
+          <p className="note max-w-3xl">
             No model provider is configured ({env.LLM_PROVIDER}). Every number on this page is
             deterministic. The explainer writes prose only and cannot affect a score, a cluster or a
             verdict, so its absence changes no metric here — which is the point of confining it to
             that role.
           </p>
-        </Panel>
+        </Sheet>
       )}
 
-      <Panel title="All runs" className="mt-5">
-        <table className="web-table">
+      <Sheet title="All runs" className="mt-5">
+        <div className="scroll-x">
+          <table className="tbl">
           <thead>
             <tr>
               <th>Run</th>
@@ -418,19 +408,18 @@ export default async function EvaluationPage() {
           <tbody>
             {runs.map((r) => (
               <tr key={r.id}>
-                <td className="web-strand text-[0.625rem] text-[var(--color-chalk-faint)]">{r.id}</td>
-                <td className="text-xs text-[var(--color-chalk-dim)]">{r.label}</td>
-                <td className="web-strand text-xs">{r.split}</td>
-                <td className="web-strand text-xs">{r.ringCount}</td>
-                <td className="web-strand text-xs">{r.riskThreshold}</td>
-                <td className="web-strand text-[0.6875rem] text-[var(--color-chalk-faint)]">
-                  {r.finishedAt ?? "—"}
-                </td>
+                <td className="id t-3">{r.id}</td>
+                <td className="text-xs t-2">{r.label}</td>
+                <td className="num text-xs">{r.split}</td>
+                <td className="num text-xs">{r.ringCount}</td>
+                <td className="num text-xs">{r.riskThreshold}</td>
+                <td className="num text-[0.6875rem] t-3">{r.finishedAt ?? "—"}</td>
               </tr>
             ))}
-          </tbody>
-        </table>
-      </Panel>
+            </tbody>
+          </table>
+        </div>
+      </Sheet>
     </>
   );
 }

@@ -1,17 +1,18 @@
-import { overviewMetrics } from "@/api/queries";
+import { mastheadCounts } from "@/api/queries";
 import { ensureBootstrapped } from "@/db/bootstrap";
 import { getDb } from "@/db/client";
-import { IssueBanner } from "@/ui/issue-banner";
+import { Masthead } from "@/ui/masthead";
 
 export const dynamic = "force-dynamic";
 
 /**
- * The page.
+ * The console.
  *
- * No sidebar. A masthead across the top and then panels on paper, with the
- * gutters a comic page has. The content area is deliberately wide: the
- * signature surface here is a graph, and a graph squeezed into the two-thirds
- * of a screen left over after a navigation rail is a graph nobody can read.
+ * No sidebar. A masthead across the top and then sheets laid out on the light
+ * box, with real gutters between them. The content column is deliberately
+ * wide: the surfaces that matter here are a graph and a stack of films, and
+ * either one squeezed into what is left over after a navigation rail is a
+ * surface nobody can read.
  */
 export default async function ConsoleLayout({ children }: { children: React.ReactNode }) {
   let openClusters = 0;
@@ -19,9 +20,9 @@ export default async function ConsoleLayout({ children }: { children: React.Reac
   try {
     await ensureBootstrapped();
     const db = await getDb();
-    const metrics = await overviewMetrics(db);
-    openClusters = metrics.detection.clusters;
-    pendingReviews = metrics.review.pending;
+    const counts = await mastheadCounts(db);
+    openClusters = counts.clusters;
+    pendingReviews = counts.pendingReviews;
   } catch {
     // An unreachable database must not blank the whole console; each page
     // renders its own error state and the masthead simply shows zero.
@@ -30,9 +31,9 @@ export default async function ConsoleLayout({ children }: { children: React.Reac
   }
 
   return (
-    <div className="min-h-screen bg-[var(--color-paper)]">
-      <IssueBanner openClusters={openClusters} pendingReviews={pendingReviews} />
-      <main className="mx-auto max-w-[1500px] px-5 py-7 sm:px-7">{children}</main>
+    <div className="min-h-screen">
+      <Masthead openClusters={openClusters} pendingReviews={pendingReviews} />
+      <main className="mx-auto max-w-[1500px] px-5 py-8 sm:px-7">{children}</main>
     </div>
   );
 }

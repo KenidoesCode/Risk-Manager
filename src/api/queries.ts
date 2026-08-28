@@ -462,3 +462,21 @@ export async function failureSummary(db: Database) {
     totalFailures: recent.length,
   };
 }
+
+/**
+ * The two counts the shell prints on every page.
+ *
+ * This exists so the console layout does not have to call `overviewMetrics`,
+ * which runs fourteen round-trips, in order to display two numbers on every
+ * request. The values are the same two `overviewMetrics` derives — total
+ * clusters, and reviews still in PENDING — computed with two counts.
+ */
+export async function mastheadCounts(db: Database) {
+  const [clusterAgg] = await db.select({ n: sql<number>`count(*)::int` }).from(clusters);
+  const [pendingAgg] = await db
+    .select({ n: sql<number>`count(*)::int` })
+    .from(humanReviews)
+    .where(eq(humanReviews.status, "PENDING"));
+
+  return { clusters: clusterAgg?.n ?? 0, pendingReviews: pendingAgg?.n ?? 0 };
+}

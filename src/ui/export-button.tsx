@@ -51,17 +51,17 @@ export function ExportButton({ clusterId }: { clusterId: string }) {
   return (
     <div className="flex flex-col items-start gap-1.5">
       <div className="flex flex-wrap gap-2">
-        <button type="button" onClick={() => download("json")} disabled={busy !== null} className="stamp-button stamp-button-ghost inline-flex items-center gap-1.5">
+        <button type="button" onClick={() => download("json")} disabled={busy !== null} className="btn btn-ghost inline-flex items-center gap-1.5">
           {busy === "json" ? <Loader2 size={12} className="animate-spin" aria-hidden /> : <Download size={12} aria-hidden />}
           Subgraph JSON
         </button>
-        <button type="button" onClick={() => download("csv")} disabled={busy !== null} className="stamp-button stamp-button-ghost inline-flex items-center gap-1.5">
+        <button type="button" onClick={() => download("csv")} disabled={busy !== null} className="btn btn-ghost inline-flex items-center gap-1.5">
           {busy === "csv" ? <Loader2 size={12} className="animate-spin" aria-hidden /> : <Download size={12} aria-hidden />}
           Accounts CSV
         </button>
       </div>
-      {message && <p className="strand text-[0.625rem] text-[var(--color-clear)]">{message}</p>}
-      {error && <p className="strand text-[0.625rem] text-[var(--color-magenta)]">{error}</p>}
+      {message && <p className="note-s t-g">{message}</p>}
+      {error && <p className="note-s t-m">{error}</p>}
     </div>
   );
 }

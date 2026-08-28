@@ -7,7 +7,7 @@ import {
   VERDICT_DESCRIPTIONS,
   CLUSTER_VERDICTS,
 } from "@/domain/vocabulary";
-import { Heading, Panel } from "@/ui/primitives";
+import { Heading, Sheet } from "@/ui/primitives";
 
 export const dynamic = "force-static";
 
@@ -22,145 +22,140 @@ export const dynamic = "force-static";
  */
 export default function SignalsPage() {
   const structural = new Set(["SHARED_PAYMENT", "SHARED_DEVICE", "SHARED_ADDRESS", "CLUSTER_DENSITY"]);
+  const concentration = new Set(["CATEGORY_CONCENTRATION", "VALUE_CONCENTRATION"]);
+
+  const plate = (signal: string) =>
+    structural.has(signal)
+      ? { tag: "tag-c", name: "structural", fill: "var(--ink-c)" }
+      : concentration.has(signal)
+        ? { tag: "tag-y", name: "concentration", fill: "var(--ink-y)" }
+        : { tag: "tag-m", name: "behavioural", fill: "var(--ink-m)" };
 
   return (
     <>
-      <Heading kicker="Work">Signal reference</Heading>
+      <Heading kicker="Check the detector">Signal reference</Heading>
 
-      <p className="mb-6 max-w-3xl text-xs leading-relaxed text-[var(--color-chalk-dim)]">
+      <p className="note mb-6 max-w-3xl">
         Every point of every risk score comes from this table. There is no model output in it, no
         learned weight, and nothing that cannot be recomputed by hand from the observations on a
-        cluster detail page.
+        cluster detail page. The plate column is the film a signal prints on in the overlay stack:
+        cyan for structure, magenta for behaviour, yellow for concentration.
       </p>
 
-      <Panel title="Signal weights" subtitle={`Total available: ${MAX_POINTS} points`}>
-        <div className="overflow-x-auto">
-          <table className="web-table">
+      <Sheet title="Signal weights" subtitle={`Total available: ${MAX_POINTS} points`}>
+        <div className="scroll-x">
+          <table className="tbl">
             <thead>
               <tr>
                 <th>Signal</th>
-                <th>Kind</th>
+                <th>Plate</th>
                 <th>Max points</th>
                 <th>Share</th>
                 <th>Why it is weighted this way</th>
               </tr>
             </thead>
             <tbody>
-              {SIGNAL_WEIGHTS.map((w) => (
-                <tr key={w.signal}>
-                  <td className="text-xs font-medium text-[var(--color-chalk)]">
-                    {w.signal.replace(/_/g, " ")}
-                  </td>
-                  <td>
-                    <span
-                      className={`web-stamp ${
-                        structural.has(w.signal)
-                          ? "text-[var(--color-node)]"
-                          : "text-[var(--color-strand)]"
-                      }`}
-                    >
-                      {structural.has(w.signal) ? "structural" : "behavioural"}
-                    </span>
-                  </td>
-                  <td className="web-strand text-xs">{w.maxPoints}</td>
-                  <td>
-                    <div className="flex items-center gap-2">
-                      <div className="web-bar w-20">
-                        <span
-                          style={{
-                            width: `${(w.maxPoints / MAX_POINTS) * 100}%`,
-                            background: structural.has(w.signal)
-                              ? "var(--color-node)"
-                              : "var(--color-strand)",
-                          }}
-                        />
+              {SIGNAL_WEIGHTS.map((w) => {
+                const p = plate(w.signal);
+                return (
+                  <tr key={w.signal}>
+                    <td className="text-xs font-semibold t-ink">{w.signal.replace(/_/g, " ")}</td>
+                    <td>
+                      <span className={`tag ${p.tag}`}>{p.name}</span>
+                    </td>
+                    <td className="num text-xs">{w.maxPoints}</td>
+                    <td>
+                      <div className="flex items-center gap-2">
+                        <div className="meter w-20 shrink-0">
+                          <span
+                            style={{ width: `${(w.maxPoints / MAX_POINTS) * 100}%`, background: p.fill }}
+                          />
+                        </div>
+                        <span className="num text-[0.625rem] t-3">
+                          {Math.round((w.maxPoints / MAX_POINTS) * 100)}%
+                        </span>
                       </div>
-                      <span className="web-strand text-[0.625rem] text-[var(--color-chalk-faint)]">
-                        {Math.round((w.maxPoints / MAX_POINTS) * 100)}%
-                      </span>
-                    </div>
-                  </td>
-                  <td className="max-w-md text-[0.6875rem] leading-relaxed text-[var(--color-chalk-dim)]">
-                    {w.rationale}
-                  </td>
-                </tr>
-              ))}
+                    </td>
+                    <td className="note-s max-w-md">{w.rationale}</td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>
-      </Panel>
+      </Sheet>
 
-      <Panel title="The structural-only guardrail" className="mt-5">
-        <p className="text-xs leading-relaxed text-[var(--color-chalk-dim)]">
+      <Sheet title="The structural-only guardrail" className="mt-5">
+        <p className="note max-w-3xl">
           Structural signals are worth 34 of the 100 available points. Even saturated, they cannot
           reach the detection threshold on their own — and when behavioural evidence contributes
           fewer than 8 points, the score is explicitly capped below the threshold regardless.
         </p>
-        <p className="mt-3 text-xs leading-relaxed text-[var(--color-chalk-dim)]">
+        <p className="note mt-3 max-w-3xl">
           This is the control that stops the system being an expensive graph visualisation of an
           ordinary household. A family shares an address, a tablet and a card; without unusual
           behaviour alongside that, no combination of structure produces a detection. Every time the
           cap fires it is written to the audit trail as GUARDRAIL_APPLIED, so the reader can see how
           often the system protected a household rather than flagging one.
         </p>
-      </Panel>
+        <p className="note mt-3 max-w-3xl">
+          In the language of the overlay stack: a cyan-only stack, however dense the cyan, is still
+          one plate. It cannot make black.
+        </p>
+      </Sheet>
 
-      <Panel title="Link strength by shared node type" className="mt-5">
+      <Sheet title="Link strength by shared node type" className="mt-5">
         <div className="space-y-4">
           {LINKING_TYPES.map((type) => (
             <div key={type}>
               <div className="flex items-baseline justify-between gap-3">
-                <span className="text-xs font-medium text-[var(--color-chalk)]">{type}</span>
-                <span className="web-strand text-xs text-[var(--color-chalk-dim)]">
-                  {LINK_STRENGTH[type].toFixed(2)}
-                </span>
+                <span className="text-xs font-semibold t-ink">{type}</span>
+                <span className="num shrink-0 text-xs t-2">{LINK_STRENGTH[type].toFixed(2)}</span>
               </div>
-              <div className="web-bar mt-1.5">
-                <span style={{ width: `${LINK_STRENGTH[type] * 100}%`, background: "var(--color-node)" }} />
+              <div className="meter mt-1.5">
+                <span style={{ width: `${LINK_STRENGTH[type] * 100}%`, background: "var(--ink-c)" }} />
               </div>
-              <p className="mt-1.5 text-[0.6875rem] leading-relaxed text-[var(--color-chalk-dim)]">
-                {LINK_RATIONALE[type]}
-              </p>
+              <p className="note-s mt-1.5">{LINK_RATIONALE[type]}</p>
             </div>
           ))}
         </div>
-        <p className="mt-4 border-t border-[var(--color-web-line)] pt-3 text-[0.6875rem] leading-relaxed text-[var(--color-chalk-faint)]">
+        <p className="note-s rule-x mt-4 max-w-3xl pt-3">
           These weights are further multiplied by a temporal factor. A device used by two accounts a
           year apart is much more likely a resold handset than two people acting together, and the
           link weight decays to a floor of 0.25 as the gap approaches a year.
         </p>
-      </Panel>
+      </Sheet>
 
-      <Panel title="Counter-signals" className="mt-5" subtitle="Legitimate readings the detector looks for on every cluster.">
-        <ul className="space-y-2 text-xs">
+      <Sheet
+        title="Counter-signals"
+        className="mt-5"
+        subtitle="Legitimate readings the detector looks for on every cluster. Each one it finds subtracts an equal 0.06 from confidence."
+      >
+        <ul className="space-y-2">
           {Object.entries(COUNTER_SIGNAL_LABELS).map(([key, label]) => (
-            <li key={key} className="flex gap-3">
-              <span className="web-strand w-56 shrink-0 text-[0.625rem] text-[var(--color-chalk-faint)]">
-                {key}
-              </span>
-              <span className="text-[var(--color-chalk-dim)]">{label}</span>
+            <li key={key} className="flex flex-wrap gap-x-3 gap-y-0.5">
+              <span className="mono w-56 shrink-0 text-[0.625rem] t-3">{key}</span>
+              <span className="note">{label}</span>
             </li>
           ))}
         </ul>
-      </Panel>
+      </Sheet>
 
-      <Panel title="Verdicts" className="mt-5">
-        <dl className="space-y-3 text-xs">
+      <Sheet title="Verdicts" className="mt-5">
+        <dl className="space-y-3">
           {CLUSTER_VERDICTS.map((v) => (
             <div key={v}>
-              <dt className="web-strand text-[0.6875rem] font-semibold text-[var(--color-chalk)]">{v}</dt>
-              <dd className="mt-0.5 leading-relaxed text-[var(--color-chalk-dim)]">
-                {VERDICT_DESCRIPTIONS[v]}
-              </dd>
+              <dt className="mono text-[0.6875rem] font-medium t-ink">{v}</dt>
+              <dd className="note mt-0.5 max-w-3xl">{VERDICT_DESCRIPTIONS[v]}</dd>
             </div>
           ))}
         </dl>
-        <p className="mt-4 border-t border-[var(--color-web-line)] pt-3 text-[0.6875rem] leading-relaxed text-[var(--color-chalk-faint)]">
+        <p className="note-s rule-x mt-4 max-w-3xl pt-3">
           Note what is absent from this list: there is no verdict meaning fraud, guilt, or a decision
           about a person. The strongest thing this system says is that coordination is likely and a
           human should look.
         </p>
-      </Panel>
+      </Sheet>
     </>
   );
 }
