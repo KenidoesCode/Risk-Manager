@@ -8,24 +8,24 @@ import { Curtain } from "@/ui/curtain";
  * Two families, six files, fetched at BUILD time and served from this origin.
  * A running instance makes no third-party request.
  *
- * Archivo is a grotesque drawn for print signage and technical setting, which
- * is the vernacular of the room this console is pretending to be in: a light
- * table, a control strip, a plate label. Set in tight uppercase for headings
- * and at 400 for everything a person actually reads.
+ * Archivo is a grotesque drawn for print signage, and it holds its counters
+ * at 900 in tight uppercase, which is what display lettering on a comic page
+ * needs and what most grotesques fall apart doing. Set at 900 for every
+ * heading and at 400 for everything a person actually reads.
  *
  * JetBrains Mono carries identifiers, densities and every column of figures,
  * with tabular numerals so scores line up down a table.
  */
 const sans = Archivo({
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
+  weight: ["400", "500", "700", "800", "900"],
   variable: "--font-archivo",
   display: "swap",
 });
 
 const mono = JetBrains_Mono({
   subsets: ["latin"],
-  weight: ["400", "500"],
+  weight: ["400", "500", "700"],
   variable: "--font-mono",
   display: "swap",
 });
@@ -37,7 +37,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#f4f8fa",
+  themeColor: "#ece2cf",
   width: "device-width",
   initialScale: 1,
 };

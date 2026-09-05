@@ -50,7 +50,7 @@ export default async function OverviewPage() {
         <DetectButton />
       </div>
 
-      <div className="grid cards gap-4">
+      <div className="stagger grid cards gap-4">
         <Metric label="Entities" value={m.graph.entities} hint={`${m.graph.accounts} accounts`} />
         <Metric
           label="Observed links"
@@ -96,7 +96,7 @@ export default async function OverviewPage() {
         />
       </div>
 
-      <div className="mt-8 grid gap-5 md:grid-cols-2">
+      <div className="stagger mt-8 grid gap-5 md:grid-cols-2">
         <Sheet title="Verdict distribution" subtitle="Deterministic. The model contributes no part of this.">
           {Object.keys(m.detection.byVerdict).length === 0 ? (
             <Empty title="No detection has been run." detail="Press Run detection above." />
@@ -150,9 +150,9 @@ export default async function OverviewPage() {
         </Sheet>
       </div>
 
-      <div className="mt-5 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+      <div className="stagger mt-5 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
         <Sheet title="Activity" className="lg:col-span-2">
-          <div className="grid cards-s gap-4">
+          <div className="stagger grid cards-s gap-4">
             <div>
               <p className="cap">Orders</p>
               <p className="num mt-1 text-lg">{m.activity.orders}</p>

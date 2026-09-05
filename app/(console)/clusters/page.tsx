@@ -105,7 +105,7 @@ export default async function ClustersPage({
                   <th>Review</th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody className="stagger">
                 {result.items.map((c) => {
                   const signals = (c.signals as StoredSignal[]).filter((s) => s.points > 0.05).slice(0, 3);
                   return (

@@ -29,7 +29,7 @@ export default async function SettingsPage() {
         </div>
       )}
 
-      <div className="grid gap-5 md:grid-cols-2">
+      <div className="stagger grid gap-5 md:grid-cols-2">
         <Sheet title="Sentinel mode">
           <dl className="space-y-3">
             <div>
@@ -137,7 +137,7 @@ export default async function SettingsPage() {
       </div>
 
       <Sheet title="Explanation model" className="mt-5">
-        <dl className="grid cards-s gap-4">
+        <dl className="stagger grid cards-s gap-4">
           <div>
             <dt className="cap">Provider</dt>
             <dd className="num mt-0.5 text-sm t-ink">{env.model.provider}</dd>
@@ -182,8 +182,8 @@ export default async function SettingsPage() {
           ].map(([method, path, description]) => (
             <li key={path} className="flex flex-wrap gap-x-3 gap-y-0.5">
               <span className="mono w-12 shrink-0 text-[0.625rem] t-m">{method}</span>
-              <span className="mono w-56 shrink-0 text-[0.6875rem] t-ink">{path}</span>
-              <span className="note flex-1">{description}</span>
+              <span className="mono w-40 shrink-0 text-[0.6875rem] t-ink sm:w-56">{path}</span>
+              <span className="note min-w-0 flex-1 break-words">{description}</span>
             </li>
           ))}
         </ul>

@@ -288,18 +288,20 @@ export function GraphView({
         <svg
           ref={svgRef}
           viewBox={`0 0 ${WIDTH} ${HEIGHT}`}
-          className="h-auto w-full min-w-[680px]"
+          className="h-auto w-full min-w-[900px]"
           role="img"
           aria-label={`Cluster graph with ${visibleNodes.length} nodes and ${visibleEdges.length} links`}
         >
           <defs>
             {/* The light box's own grid, ruled under the sheet. */}
-            <pattern id="lightbox-grid" width="20" height="20" patternUnits="userSpaceOnUse">
-              <path d="M20 0H0V20" fill="none" stroke="#10161b" strokeOpacity="0.05" strokeWidth="1" />
+            {/* The page's own Ben-Day screen, at the graph's scale. */}
+            <pattern id="benday" width="8" height="8" patternUnits="userSpaceOnUse">
+              <circle cx="2" cy="2" r="1" fill="#131117" fillOpacity="0.09" />
+              <circle cx="6" cy="6" r="1" fill="#ec008c" fillOpacity="0.07" />
             </pattern>
           </defs>
-          <rect width={WIDTH} height={HEIGHT} fill="#ffffff" />
-          <rect width={WIDTH} height={HEIGHT} fill="url(#lightbox-grid)" />
+          <rect width={WIDTH} height={HEIGHT} fill="#fbf7ec" />
+          <rect width={WIDTH} height={HEIGHT} fill="url(#benday)" />
 
           {/* Edges first, so nodes sit above them. */}
           <g>
@@ -315,7 +317,7 @@ export function GraphView({
                   y1={a.y}
                   x2={b.x}
                   y2={b.y}
-                  stroke={edge.derived ? "var(--film-m)" : "var(--ink-c)"}
+                  stroke={edge.derived ? "#ec008c" : "#005f7d"}
                   strokeWidth={edge.derived ? Math.max(1, edge.weight * 3) : 1.2}
                   strokeOpacity={edge.derived ? 0.5 + edge.weight * 0.4 : 0.55}
                   className={`g-edge ${edge.derived ? "g-derived" : ""}`}
@@ -348,7 +350,7 @@ export function GraphView({
                     r={radius}
                     fill={style.fill}
                     fillOpacity={isSelected ? 0.95 : 0.7}
-                    stroke={isSelected ? "#10161b" : style.stroke}
+                    stroke={isSelected ? "#131117" : style.stroke}
                     strokeWidth={isSelected ? 3 : 1.5}
                     className="g-node"
                     onClick={() => {
@@ -371,14 +373,19 @@ export function GraphView({
                       {p.node.fanout > 0 ? ` · touched by ${p.node.fanout} link(s)` : ""}
                     </title>
                   </circle>
+                  {/* 12 SVG units, not 8. The viewBox is 900 wide and this
+                      SVG's min-width is 900px, so one unit is one CSS pixel at
+                      the narrowest it is ever drawn and the label renders at
+                      12px there. At 8 it rendered at 6px on a phone, while
+                      getComputedStyle went on reporting the authored 8. */}
                   {p.node.type === "ACCOUNT" && (
                     <text
                       x={p.x}
                       y={p.y + radius + 11}
                       textAnchor="middle"
                       className="mono"
-                      fontSize="8"
-                      fill="var(--ink-3)"
+                      fontSize="12"
+                      fill="var(--ink-2)"
                       pointerEvents="none"
                     >
                       {p.node.anonymizedKey.slice(-6)}

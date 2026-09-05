@@ -44,7 +44,7 @@ export default async function AuditPage({
     <>
       <Heading kicker="Check the detector">Audit trail</Heading>
 
-      <p className="note mb-5 max-w-3xl">
+      <p className="capbox mb-6 max-w-3xl">
         Append-only. Nothing here is updated or deleted. Filter by correlation id to reconstruct one
         request end to end, or by cluster id to reconstruct everything that happened to a cluster.
       </p>
@@ -89,7 +89,7 @@ export default async function AuditPage({
                   <th>Time</th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody className="stagger">
                 {result.events.map((e) => (
                   <tr key={e.id}>
                     <td className="num text-[0.625rem] t-3">{e.sequence}</td>

@@ -84,7 +84,7 @@ export default async function EvaluationPage() {
       </div>
 
       {metrics?.ring && (
-        <div className="grid cards gap-4">
+        <div className="stagger grid cards gap-4">
           <Metric
             label="Ring precision"
             value={pct(metrics.ring.precision.value)}
@@ -128,7 +128,7 @@ export default async function EvaluationPage() {
                 <th>Account baseline (no graph features)</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody className="stagger">
               {(
                 [
                   ["Precision", (m: PerformanceMetrics) => ratio(m.precision)],
@@ -149,7 +149,7 @@ export default async function EvaluationPage() {
           </table>
         </div>
 
-        <p className="note mt-4 max-w-3xl">
+        <p className="capbox mt-5 max-w-3xl">
           The baseline is tuned on the same split with the same cost ratio, so this compares two
           tuned detectors rather than a tuned one against a straw man. Where the baseline wins, this
           table says so.
@@ -163,7 +163,7 @@ export default async function EvaluationPage() {
           subtitle="The product's central claim, measured — and able to falsify it."
           className="mt-5"
         >
-          <div className="grid cards-s gap-4">
+          <div className="stagger grid cards-s gap-4">
             <div>
               <p className="cap">Suspicious rings</p>
               <p className="num mt-1 text-lg">{recovery.suspiciousRings}</p>
@@ -182,7 +182,7 @@ export default async function EvaluationPage() {
             </div>
           </div>
 
-          <p className="note mt-4 max-w-3xl">
+          <p className="capbox mt-5 max-w-3xl">
             {recovery.baselineMissed === 0
               ? "The account baseline caught every suspicious ring in this split, so there was nothing for the graph to recover. That is an honest negative result for the recall half of the thesis — and the comparison table above shows where the graph earns its place instead: on precision, and specifically on not flagging households."
               : `Of the ${recovery.baselineMissed} ring(s) the account baseline missed, the graph found ${recovery.graphRecovered}.`}
@@ -205,7 +205,7 @@ export default async function EvaluationPage() {
                   <th>Recovered</th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody className="stagger">
                 {recovery.byTemplate.map((t) => (
                   <tr key={t.template}>
                     <td className="text-xs t-2">{t.template.replace(/_/g, " ")}</td>
@@ -241,7 +241,7 @@ export default async function EvaluationPage() {
                   <th>What this is</th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody className="stagger">
                 {hardNegatives.map((h) => (
                   <tr key={h.template}>
                     <td className="text-xs font-semibold t-ink">{h.template.replace(/_/g, " ")}</td>
@@ -289,7 +289,7 @@ export default async function EvaluationPage() {
                   <th>Cost</th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody className="stagger">
                 {sweep.options.map((o) => {
                   const chosen = latest?.riskThreshold === o.threshold;
                   return (
@@ -319,7 +319,7 @@ export default async function EvaluationPage() {
       )}
 
       {/* -------------------------------------------------- SLICES -- */}
-      <div className="mt-5 grid gap-5 md:grid-cols-2">
+      <div className="stagger mt-5 grid gap-5 md:grid-cols-2">
         <Sheet title="By difficulty">
           <div className="scroll-x">
             <table className="tbl">
@@ -331,7 +331,7 @@ export default async function EvaluationPage() {
                 <th>Recall</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody className="stagger">
               {(metrics?.byDifficulty ?? []).map((s) => (
                 <tr key={s.key}>
                   <td>
@@ -405,7 +405,7 @@ export default async function EvaluationPage() {
               <th>Finished</th>
             </tr>
           </thead>
-          <tbody>
+          <tbody className="stagger">
             {runs.map((r) => (
               <tr key={r.id}>
                 <td className="id t-3">{r.id}</td>

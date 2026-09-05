@@ -35,7 +35,7 @@ export default function SignalsPage() {
     <>
       <Heading kicker="Check the detector">Signal reference</Heading>
 
-      <p className="note mb-6 max-w-3xl">
+      <p className="capbox mb-7 max-w-3xl">
         Every point of every risk score comes from this table. There is no model output in it, no
         learned weight, and nothing that cannot be recomputed by hand from the observations on a
         cluster detail page. The plate column is the film a signal prints on in the overlay stack:
@@ -54,7 +54,7 @@ export default function SignalsPage() {
                 <th>Why it is weighted this way</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody className="stagger">
               {SIGNAL_WEIGHTS.map((w) => {
                 const p = plate(w.signal);
                 return (

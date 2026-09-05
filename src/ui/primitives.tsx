@@ -76,7 +76,7 @@ export function Metric({
   const missing = value === null || value === undefined || value === "";
 
   return (
-    <div className="sheet px-4 py-3">
+    <div className="sheet px-4 py-3.5">
       <p className="cap">{label}</p>
       <p className={`num fig mt-1.5 font-medium ${missing ? "t-3" : TONE_CLASS[tone]}`}>
         {missing ? "—" : value}
@@ -180,7 +180,9 @@ export function SignalRow({
 export function Empty({ title, detail }: { title: string; detail?: string }) {
   return (
     <div className="empty">
-      <p className="mono text-xs t-2">{title}</p>
+      {/* An empty panel says nothing was found, in the same lettering the rest
+          of the page uses. It must never be mistaken for a clean result. */}
+      <p className="dsp text-base t-ink sm:text-lg">{title}</p>
       {detail && <p className="note-s mx-auto mt-2 max-w-lg">{detail}</p>}
     </div>
   );
@@ -223,15 +225,25 @@ export function Relative({ iso }: { iso: string | null }) {
 }
 
 /**
- * A page title, set as a plate label: the section eyebrow, the name in tight
- * uppercase, and a process control strip under it.
+ * A page title, set the way a comic page sets one: the section eyebrow, the
+ * name in tight heavy uppercase with the plates out of register, and the
+ * four-colour bar under it.
  */
 export function Heading({ children, kicker }: { children: ReactNode; kicker?: string }) {
   return (
-    <div className="mb-6">
-      {kicker && <p className="cap mb-1">{kicker}</p>}
-      <h1 className="dsp dsp-page">{children}</h1>
-      <div className="strip mt-2.5 max-w-[13rem]" aria-hidden />
+    <div className="reveal mb-7">
+      {kicker && <p className="cap mb-1.5">{kicker}</p>}
+      <h1 className="dsp ghost dsp-page">{children}</h1>
+      <div className="strip mt-3 max-w-[13rem]" aria-hidden />
     </div>
   );
+}
+
+/**
+ * The one sentence a section needs before its data means anything, set in the
+ * yellow box a comic page puts it in. Kept separate from Heading because most
+ * pages carry more than one, at the point in the page where it is needed.
+ */
+export function Caption({ children, tone = "y" }: { children: ReactNode; tone?: "y" | "c" }) {
+  return <p className={`capbox ${tone === "c" ? "capbox-c" : ""} my-5 max-w-3xl`}>{children}</p>;
 }

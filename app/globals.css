@@ -1,33 +1,33 @@
 @import "tailwindcss";
 
 /* ==========================================================================
-   LIGHT TABLE — WHY SUBTRACTIVE COLOUR IS THE RIGHT LANGUAGE FOR THIS PRODUCT
+   OFF-REGISTER — WHY THIS CONSOLE IS PRINTED RATHER THAN RENDERED
    ==========================================================================
 
-   This console does exactly one interesting thing: it refuses to flag a group
+   This product does exactly one interesting thing: it refuses to flag a group
    on any single signal, and it flags one when several weak signals land on the
    same set of accounts. A shared address is nothing. A shared address plus a
    shared device plus a burst of returns inside eight hours is something. The
-   whole product is the arithmetic of stacking weak evidence.
+   whole product is the arithmetic of stacking weak evidence, and the whole
+   product is a graph — accounts strung together on shared infrastructure.
 
-   That arithmetic already has a physical form, and it is not a bar chart. It
-   is a sheet of film on a light box. One translucent film tints the light.
-   Three stacked films multiply their transmittances and go nearly black. The
-   darkness is not chosen — it falls out of the compositing.
+   A web is the data structure. A four-colour comic page is the medium, because
+   a comic page is the only place a reader already accepts that one figure is
+   six variants of the same actor standing in one panel — which is exactly what
+   a coordinated return ring is.
 
-   So the ground here is a backlit near-white diffuser, slightly cool, with a
-   falloff at the edges, and every piece of evidence is a translucent process
-   film laid on it. `mix-blend-mode: multiply` does the stacking for real: the
-   composite colour on the cluster detail page is not a hand-picked value per
-   risk band, it is what the browser gets when it multiplies the films the
-   detector actually produced.
+   So the ground is newsprint under a Ben-Day screen: two dot plates, black and
+   magenta, deliberately half a cell out of register. Panels are hard black
+   rules with an offset drop. Display type carries a cyan and a magenta ghost
+   because the plates never line up. Nothing here is a gradient pretending to
+   be glass.
 
    THE DENSITY IS THE SCORE, AND THAT IS NOT A METAPHOR
    ---------------------------------------------------
    Optical density D = -log10(T), where T is the fraction of light a film
    passes. Stacked films ADD their densities. Risk points also add. The two
-   arithmetics are the same arithmetic, so the stack can carry the score with
-   no lookup table and no tuned constant:
+   arithmetics are the same arithmetic, so a stack of process films can carry
+   the score with no lookup table and no tuned constant:
 
        D(signal) = points / 100          a signal worth 18 points is D 0.18
        T(signal) = 10^(-D)               its transmittance
@@ -49,8 +49,8 @@
    is looking at a detector that cannot separate the two readings, and the page
    says so in those words.
 
-   COLOUR IS STATE, AND THE STATES ARE THE SUBTRACTIVE PRIMARIES AND SECONDARIES
-   ----------------------------------------------------------------------------
+   COLOUR IS STATE, AND THE STATES ARE THE PROCESS INKS
+   ---------------------------------------------------
      CYAN        structural evidence — shared infrastructure, observed
      MAGENTA     behavioural evidence — rates, timing, velocity
      YELLOW      concentration evidence — narrow categories, narrow value
@@ -61,7 +61,17 @@
    lay them over each other, blue is what cyan and magenta make. Nothing in the
    palette is arbitrary, and there is no red and no word for guilt anywhere.
 
-   Data surfaces stay near-black on white. The output of this system is a
+   MOTION IS ON TWOS
+   -----------------
+   Every entrance and every transition in this stylesheet runs through
+   `steps()` rather than a smooth curve. Limited animation — holding a drawing
+   for two frames instead of one — is the most recognisable property of the
+   medium, and it is the honest choice here as well: this console shows
+   discrete states, so it should snap between them rather than glide. All of it
+   is cancelled under `prefers-reduced-motion: reduce`, at the bottom of the
+   file.
+
+   Data surfaces stay near-black on paper. The output of this system is a
    decision to investigate real people, and it has to survive being read for
    eight hours and being read under scrutiny.
    ========================================================================== */
@@ -69,43 +79,55 @@
 :root {
   color-scheme: light;
 
-  /* The light box itself: a cool diffuser, hot near the top, falling off. */
-  --lb-white: #ffffff;
-  --lb-base: #f4f8fa;
-  --lb-dim: #e7eef3;
-  --lb-edge: #d5dfe7;
+  /* Newsprint. Warm, not white; the screen sits on top of it. */
+  --paper: #ece2cf;
+  --paper-2: #f6efe0;
+  --sheet: #fbf7ec;
+  --sheet-2: #f1e9d8;
 
-  /* Sheets laid on the box. */
-  --sheet: #ffffff;
-  --sheet-2: #f2f6f9;
-  --rule: #cbd6de;
-  --rule-soft: #e4ebf0;
+  /* Kept under their old names because every page in this app already asks
+     for them; they are rules and gutters now rather than cool hairlines. */
+  --lb-white: #fdfbf4;
+  --lb-base: #ece2cf;
+  --lb-dim: #e3d7bf;
+  --lb-edge: #d3c4a7;
+  --rule: #131117;
+  --rule-soft: #c9bda4;
 
-  /* Ink. Near-black, faintly blue, never pure #000. */
-  --ink: #10161b;
-  --ink-2: #47555f;
-  --ink-3: #7b8b96;
+  /* The dark side of the book: the void the intro sequence happens in. */
+  --void: #0b0a12;
+  --void-2: #171334;
 
-  /* Process films. These are the fill colours, used translucent and
-     multiplied. They are not text colours — see the -t pair below. */
+  /* Ink. A printed black, faintly violet, never pure #000. */
+  --ink: #131117;
+  --ink-2: #3d372f;
+  --ink-3: #5f584c;
+
+  /* Process films. Fill colours, used translucent and multiplied. They are
+     not text colours — see the ink- pair below. */
   --film-c: #00aeef;
   --film-m: #ec008c;
   --film-y: #ffe800;
 
-  /* The same four hues at a density that survives as 12px text on white. */
-  --ink-c: #00738f;
-  --ink-m: #bf0072;
-  --ink-y: #8a6800;
-  --ink-g: #0d7145; /* cyan over yellow */
-  --ink-b: #4436c4; /* cyan over magenta */
+  /* The same four hues at a density that survives as 12px text on newsprint.
+     Each checked against --paper for AA at small sizes. */
+  --ink-c: #005f7d;
+  --ink-m: #ab0064;
+  --ink-y: #6f5300;
+  --ink-g: #0a6239; /* cyan over yellow */
+  --ink-b: #382db0; /* cyan over magenta */
 
   --type-sans: var(--font-archivo), ui-sans-serif, system-ui, sans-serif;
   --type-mono: var(--font-mono), ui-monospace, "SF Mono", Menlo, monospace;
+
+  /* The Ben-Day cell. One number, used by the page screen, the panel screens
+     and the intro canvas, so every dot on this site is on the same grid. */
+  --cell: 6px;
 }
 
 @layer base {
   html {
-    background: var(--lb-dim);
+    background: var(--paper);
     overflow-x: clip;
   }
 
@@ -113,23 +135,18 @@
     color: var(--ink);
     font-family: var(--type-sans);
     -webkit-font-smoothing: antialiased;
-    /* Backlit, not flat white: hot above the fold, falling off to the edges,
-       over the fine scan of an opal diffuser. */
+    /*
+     * Two dot plates, black and magenta, offset by half a cell. That offset is
+     * the whole look: a screen in perfect register reads as a texture, a
+     * screen out of register reads as printing.
+     */
+    background-color: var(--paper);
     background-image:
-      repeating-linear-gradient(
-        0deg,
-        rgba(16, 22, 27, 0.016) 0 1px,
-        rgba(255, 255, 255, 0) 1px 3px
-      ),
-      radial-gradient(
-        150% 105% at 50% -12%,
-        var(--lb-white) 0%,
-        #f8fbfc 26%,
-        var(--lb-base) 48%,
-        var(--lb-dim) 76%,
-        var(--lb-edge) 100%
-      );
-    background-attachment: fixed, fixed;
+      radial-gradient(circle at 50% 50%, rgba(19, 17, 23, 0.1) 1.05px, transparent 1.2px),
+      radial-gradient(circle at 50% 50%, rgba(236, 0, 140, 0.07) 1.05px, transparent 1.2px),
+      radial-gradient(120% 90% at 50% -10%, rgba(255, 255, 255, 0.5) 0%, rgba(255, 255, 255, 0) 62%);
+    background-size: var(--cell) var(--cell), var(--cell) var(--cell), 100% 100%;
+    background-position: 0 0, calc(var(--cell) / 2) calc(var(--cell) / 2), 0 0;
     /*
      * The page never scrolls sideways; wide content scrolls inside .scroll-x.
      * `clip` rather than `hidden` on purpose: `overflow-x: hidden` makes the
@@ -145,20 +162,20 @@
   }
 
   :where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
-    outline: 2px solid var(--ink-m);
+    outline: 3px solid var(--film-m);
     outline-offset: 2px;
   }
 
   * {
     scrollbar-width: thin;
-    scrollbar-color: var(--rule) transparent;
+    scrollbar-color: var(--ink) transparent;
   }
   *::-webkit-scrollbar {
     height: 9px;
     width: 9px;
   }
   *::-webkit-scrollbar-thumb {
-    background: var(--rule);
+    background: var(--ink);
   }
   *::-webkit-scrollbar-track {
     background: transparent;
@@ -182,18 +199,29 @@
 
   .dsp {
     font-family: var(--type-sans);
-    font-weight: 700;
-    letter-spacing: -0.018em;
-    line-height: 1.02;
+    font-weight: 900;
+    letter-spacing: -0.024em;
+    line-height: 0.98;
     text-transform: uppercase;
   }
 
-  /* Control-strip labels. Tracked out, but with trailing space added back so
-     the last letter cannot clip against its container. */
+  /*
+   * Misregistration. The cyan plate landed left of the black, the magenta
+   * plate landed right of it. Only ever applied at display sizes — at body
+   * sizes a two-pixel ghost is not a look, it is a legibility bug.
+   */
+  .ghost {
+    text-shadow:
+      -0.042em -0.012em 0 var(--film-c),
+      0.042em 0.012em 0 var(--film-m);
+  }
+
+  /* Panel captions and control labels. Tracked out, but with trailing space
+     added back so the last letter cannot clip against its container. */
   .cap {
     font-family: var(--type-sans);
     font-size: 0.625rem;
-    font-weight: 600;
+    font-weight: 700;
     letter-spacing: 0.14em;
     text-transform: uppercase;
     color: var(--ink-3);
@@ -265,15 +293,65 @@
     color: var(--ink-b);
   }
 
+  /*
+   * THE CAPTION BOX. A comic page states its terms in a yellow box in the
+   * corner of the panel, not in a subtitle under a heading. Used for the one
+   * sentence a section needs before its data makes sense. The rotation is
+   * under a degree and the box always carries margin, so it cannot reach far
+   * enough to push a horizontal scrollbar.
+   */
+  .capbox {
+    display: block;
+    background: var(--film-y);
+    border: 2px solid var(--ink);
+    box-shadow: 3px 3px 0 var(--ink);
+    padding: 0.5rem 0.72rem;
+    font-family: var(--type-sans);
+    font-size: 0.75rem;
+    font-weight: 600;
+    line-height: 1.55;
+    color: var(--ink);
+    transform: rotate(-0.5deg);
+  }
+
+  .capbox-c {
+    background: var(--film-c);
+  }
+
   /* --------------------------------------------------------- STRUCTURE -- */
 
-  /* A sheet lying on the light box. Almost no shadow — a sheet on a lit
-     diffuser is edge-lit, not floating — but a definite cool edge. */
+  /*
+   * A panel. Hard black rule, hard offset drop, no blur and no radius — ink
+   * does not have a soft shadow. The screen inside it is a quarter-strength
+   * repeat of the page screen, so a panel reads as a lighter patch of the same
+   * printed sheet rather than a card floating above one.
+   */
   .sheet {
-    background: var(--sheet);
-    border: 1px solid var(--rule);
+    background-color: var(--sheet);
+    background-image: radial-gradient(
+      circle at 50% 50%,
+      rgba(19, 17, 23, 0.045) 1.05px,
+      transparent 1.2px
+    );
+    background-size: var(--cell) var(--cell);
+    border: 2px solid var(--ink);
     position: relative;
-    box-shadow: 0 1px 0 rgba(16, 22, 27, 0.04);
+    box-shadow: 4px 4px 0 var(--ink);
+  }
+
+  /* A panel that is itself a link picks up the button's push. */
+  a.sheet {
+    transition:
+      transform 90ms steps(2, end),
+      box-shadow 90ms steps(2, end);
+  }
+  a.sheet:hover {
+    transform: translate3d(-2px, -2px, 0);
+    box-shadow: 7px 7px 0 var(--ink);
+  }
+  a.sheet:active {
+    transform: translate3d(2px, 2px, 0);
+    box-shadow: 2px 2px 0 var(--ink);
   }
 
   .sheet-hd {
@@ -282,13 +360,16 @@
     justify-content: space-between;
     gap: 1rem;
     padding: 0.85rem 1.15rem;
-    border-bottom: 1px solid var(--rule-soft);
+    border-bottom: 2px solid var(--ink);
+    background: var(--paper-2);
   }
 
   .sheet-ti {
+    font-family: var(--type-sans);
     font-size: 0.8125rem;
-    font-weight: 700;
-    letter-spacing: 0.01em;
+    font-weight: 800;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
     color: var(--ink);
   }
 
@@ -296,65 +377,75 @@
     padding: 1.15rem;
   }
 
-  /* Crop corners, at the trim edge of a sheet. Eight hairlines, no image. */
-  .marks::after {
-    content: "";
-    position: absolute;
-    inset: -8px;
-    pointer-events: none;
-    background:
-      linear-gradient(var(--rule), var(--rule)) 0 0 / 11px 1px no-repeat,
-      linear-gradient(var(--rule), var(--rule)) 0 0 / 1px 11px no-repeat,
-      linear-gradient(var(--rule), var(--rule)) 100% 0 / 11px 1px no-repeat,
-      linear-gradient(var(--rule), var(--rule)) 100% 0 / 1px 11px no-repeat,
-      linear-gradient(var(--rule), var(--rule)) 0 100% / 11px 1px no-repeat,
-      linear-gradient(var(--rule), var(--rule)) 0 100% / 1px 11px no-repeat,
-      linear-gradient(var(--rule), var(--rule)) 100% 100% / 11px 1px no-repeat,
-      linear-gradient(var(--rule), var(--rule)) 100% 100% / 1px 11px no-repeat;
+  /*
+   * A panel that carries an argument gets a second plate behind it, cyan,
+   * printed a few pixels off. Same job the crop marks did — mark the sheets
+   * that matter — in the medium the rest of the site is now in.
+   *
+   * Drawn with box-shadows rather than a `z-index: -1` pseudo-element, and the
+   * reason is worth stating: a negative z-index only goes behind the parent's
+   * background while the parent is not a stacking context, and `.reveal` puts
+   * an opacity-and-transform animation on several of these panels, which makes
+   * one. The plate then printed on TOP of the panel and filled it with cyan.
+   * A box-shadow paints outside the border box and under the background, with
+   * no stacking context anywhere in the question.
+   */
+  .marks {
+    box-shadow:
+      4px 4px 0 var(--ink),
+      -7px 7px 0 0 var(--film-c),
+      -7px 7px 0 2px var(--ink);
   }
 
-  /* The plate-maker's registration target. */
+  /*
+   * The web target. A spider's orb has radial spokes and spiral catch-lines;
+   * this is that at 14 pixels, four spokes over two rings. It replaces the
+   * printer's registration mark it grew out of — same job, marks the plate,
+   * and here it also says what the data structure is.
+   */
   .reg {
     display: inline-block;
     position: relative;
-    width: 12px;
-    height: 12px;
-    border: 1px solid currentColor;
-    border-radius: 50%;
+    width: 14px;
+    height: 14px;
     flex: none;
-  }
-  .reg::before,
-  .reg::after {
-    content: "";
-    position: absolute;
-    background: currentColor;
+    border-radius: 50%;
+    border: 1.5px solid currentColor;
+    background: conic-gradient(
+      from 0deg,
+      currentColor 0 2deg,
+      transparent 2deg 88deg,
+      currentColor 88deg 92deg,
+      transparent 92deg 178deg,
+      currentColor 178deg 182deg,
+      transparent 182deg 268deg,
+      currentColor 268deg 272deg,
+      transparent 272deg 360deg
+    );
   }
   .reg::before {
-    left: 50%;
-    top: -4px;
-    bottom: -4px;
-    width: 1px;
-    transform: translateX(-0.5px);
-  }
-  .reg::after {
-    top: 50%;
-    left: -4px;
-    right: -4px;
-    height: 1px;
-    transform: translateY(-0.5px);
+    content: "";
+    position: absolute;
+    inset: 3px;
+    border: 1.5px solid currentColor;
+    border-radius: 50%;
+    background: var(--paper-2);
   }
 
-  /* The prepress control strip: process patches in a row. Used as a rule, so
-     every horizontal division on the page is a colour bar. */
+  /*
+   * The gutter rule. On a comic page the space between panels is black, and
+   * the four-colour bar the old prepress strip carried is still the honest
+   * legend for this palette, so it survives as the fill.
+   */
   .strip {
-    height: 3px;
+    height: 7px;
+    border: 2px solid var(--ink);
     background: linear-gradient(
       90deg,
-      var(--film-c) 0 14%,
-      var(--film-m) 14% 28%,
-      var(--film-y) 28% 42%,
-      var(--ink) 42% 50%,
-      var(--rule-soft) 50% 100%
+      var(--film-c) 0 25%,
+      var(--film-m) 25% 50%,
+      var(--film-y) 50% 75%,
+      var(--ink) 75% 100%
     );
   }
 
@@ -371,42 +462,58 @@
   /* --------------------------------------------------------- MASTHEAD --- */
 
   .masthead {
-    background: rgba(255, 255, 255, 0.86);
-    backdrop-filter: saturate(1.1) blur(6px);
-    border-bottom: 1px solid var(--rule);
+    background: var(--paper-2);
+    border-bottom: 3px solid var(--ink);
+    box-shadow: 0 3px 0 rgba(19, 17, 23, 0.18);
   }
 
   .wordmark {
     font-family: var(--type-sans);
-    font-weight: 700;
-    letter-spacing: -0.02em;
+    font-weight: 900;
+    letter-spacing: -0.032em;
     text-transform: uppercase;
     color: var(--ink);
     line-height: 1;
   }
 
+  /*
+   * A section tab is a small panel in the strip along the top of the page. At
+   * rest it is drawn but not dropped; on hover it lifts; the current one is a
+   * filled yellow panel pressed flat into the page, in the same yellow the
+   * caption boxes use and meaning the same thing — this is the bit you are on.
+   */
   .tab {
     font-family: var(--type-sans);
     font-size: 0.6875rem;
-    font-weight: 600;
-    letter-spacing: 0.06em;
+    font-weight: 800;
+    letter-spacing: 0.07em;
     text-transform: uppercase;
-    padding: 0.34rem 0.62rem;
+    padding: 0.36rem 0.66rem;
     color: var(--ink-2);
-    border: 1px solid transparent;
+    background: var(--sheet);
+    border: 2px solid var(--ink);
     white-space: nowrap;
-    transition: color 110ms ease, background-color 110ms ease;
+    position: relative;
+    transition:
+      transform 90ms steps(2, end),
+      box-shadow 90ms steps(2, end),
+      background-color 90ms steps(2, end),
+      color 90ms steps(2, end);
   }
   .tab:hover {
     color: var(--ink);
-    background: var(--sheet-2);
+    background: var(--paper-2);
+    transform: translate3d(-2px, -2px, 0);
+    box-shadow: 3px 3px 0 var(--ink);
   }
-  /* The current section is a film laid on the tab — the same mechanism as
-     everything else on the page, at its smallest scale. */
+  .tab:active {
+    transform: translate3d(1px, 1px, 0);
+    box-shadow: none;
+  }
   .tab[aria-current="page"] {
     color: var(--ink);
-    background: color-mix(in srgb, var(--film-y) 42%, transparent);
-    border-color: color-mix(in srgb, var(--ink-y) 32%, transparent);
+    background: var(--film-y);
+    box-shadow: inset 0 0 0 2px var(--sheet);
   }
 
   /* ------------------------------------------------------------- TAGS --- */
@@ -414,39 +521,35 @@
   .tag {
     font-family: var(--type-mono);
     font-size: 0.625rem;
-    font-weight: 500;
-    letter-spacing: 0.09em;
+    font-weight: 700;
+    letter-spacing: 0.08em;
     text-transform: uppercase;
-    padding: 0.15rem 0.42rem 0.15rem 0.44rem;
-    border: 1px solid currentColor;
+    padding: 0.16rem 0.44rem;
+    border: 2px solid var(--ink);
+    color: var(--ink);
     display: inline-block;
     white-space: nowrap;
     line-height: 1.35;
   }
 
   .tag-c {
-    color: var(--ink-c);
-    background: color-mix(in srgb, var(--film-c) 12%, transparent);
+    background: color-mix(in srgb, var(--film-c) 34%, var(--sheet));
   }
   .tag-m {
-    color: var(--ink-m);
-    background: color-mix(in srgb, var(--film-m) 10%, transparent);
+    background: color-mix(in srgb, var(--film-m) 26%, var(--sheet));
   }
   .tag-y {
-    color: var(--ink-y);
-    background: color-mix(in srgb, var(--film-y) 30%, transparent);
+    background: var(--film-y);
   }
   .tag-g {
-    color: var(--ink-g);
-    background: color-mix(in srgb, var(--ink-g) 8%, transparent);
+    background: color-mix(in srgb, var(--ink-g) 22%, var(--sheet));
   }
   .tag-b {
-    color: var(--ink-b);
-    background: color-mix(in srgb, var(--ink-b) 8%, transparent);
+    background: color-mix(in srgb, var(--ink-b) 20%, var(--sheet));
   }
   .tag-n {
-    color: var(--ink-3);
-    background: transparent;
+    background: var(--sheet);
+    color: var(--ink-2);
   }
 
   /* ------------------------------------------------------------ TABLE --- */
@@ -459,29 +562,33 @@
 
   .tbl thead th {
     font-family: var(--type-sans);
-    font-size: 0.5938rem;
-    font-weight: 700;
-    letter-spacing: 0.13em;
+    font-size: 0.625rem;
+    font-weight: 800;
+    letter-spacing: 0.12em;
     text-transform: uppercase;
-    color: var(--ink-3);
+    color: var(--ink);
     text-align: left;
     padding: 0.5rem 0.7rem;
-    border-bottom: 1px solid var(--ink);
+    border-bottom: 2px solid var(--ink);
     white-space: nowrap;
-    background: var(--sheet);
+    background: var(--paper-2);
   }
 
   .tbl tbody td {
-    padding: 0.55rem 0.7rem;
+    padding: 0.6rem 0.7rem;
     border-bottom: 1px solid var(--rule-soft);
     vertical-align: top;
     color: var(--ink-2);
   }
 
-  .tbl tbody tr:hover {
-    background: color-mix(in srgb, var(--film-y) 13%, transparent);
+  /* The hover is a yellow highlighter drawn across the row, held for two
+     frames rather than faded. */
+  .tbl tbody tr {
+    transition: background-color 90ms steps(2, end);
   }
-
+  .tbl tbody tr:hover {
+    background: color-mix(in srgb, var(--film-y) 45%, transparent);
+  }
   .tbl tbody tr:last-child td {
     border-bottom: 0;
   }
@@ -490,9 +597,9 @@
 
   /* A fixed 0–100 track, so two scores are visually comparable. */
   .meter {
-    height: 6px;
+    height: 9px;
     background: var(--sheet-2);
-    border: 1px solid var(--rule-soft);
+    border: 2px solid var(--ink);
     position: relative;
     overflow: hidden;
   }
@@ -504,65 +611,80 @@
     position: absolute;
     top: 0;
     bottom: 0;
-    width: 1px;
+    width: 2px;
     background: var(--ink);
   }
 
   /* --------------------------------------------------------- CONTROLS --- */
 
+  /*
+   * A button is a panel you can push. The drop is the affordance: at rest it
+   * sits four pixels off the page, on hover it lifts to six, and pressing it
+   * puts it flat on the paper. Nothing fades.
+   */
   .btn {
     font-family: var(--type-sans);
     font-size: 0.6875rem;
-    font-weight: 700;
-    letter-spacing: 0.07em;
+    font-weight: 900;
+    letter-spacing: 0.09em;
     text-transform: uppercase;
-    padding: 0.5rem 0.95rem;
-    background: var(--ink-m);
-    color: #fff;
-    border: 1px solid var(--ink-m);
+    padding: 0.55rem 1rem;
+    background: var(--film-m);
+    color: var(--ink);
+    border: 2px solid var(--ink);
+    box-shadow: 4px 4px 0 var(--ink);
     cursor: pointer;
-    transition: background-color 110ms ease, color 110ms ease;
+    display: inline-block;
+    transition:
+      transform 90ms steps(2, end),
+      box-shadow 90ms steps(2, end),
+      background-color 90ms steps(2, end);
   }
   .btn:hover:not(:disabled) {
-    background: var(--ink);
-    border-color: var(--ink);
+    background: var(--film-y);
+    transform: translate3d(-2px, -2px, 0);
+    box-shadow: 6px 6px 0 var(--ink);
+  }
+  .btn:active:not(:disabled) {
+    transform: translate3d(4px, 4px, 0);
+    box-shadow: 0 0 0 var(--ink);
   }
   .btn:disabled {
-    opacity: 0.45;
+    background: var(--sheet-2);
+    color: var(--ink-3);
+    border-color: var(--rule-soft);
+    box-shadow: 2px 2px 0 var(--rule-soft);
     cursor: not-allowed;
   }
 
   .btn-ghost {
     background: var(--sheet);
     color: var(--ink);
-    border: 1px solid var(--rule);
   }
   .btn-ghost:hover:not(:disabled) {
-    background: var(--sheet-2);
-    color: var(--ink);
-    border-color: var(--ink);
+    background: var(--film-c);
   }
 
   .field {
     font-family: var(--type-mono);
     font-size: 0.75rem;
     width: 100%;
-    background: var(--sheet-2);
-    border: 1px solid var(--rule);
+    background: var(--sheet);
+    border: 2px solid var(--ink);
     color: var(--ink);
     padding: 0.5rem 0.6rem;
     outline: none;
+    transition: box-shadow 90ms steps(2, end);
   }
   .field:focus {
-    border-color: var(--ink-m);
-    background: var(--sheet);
+    box-shadow: 3px 3px 0 var(--film-m);
   }
 
   /* -------------------------------------------------------- THE STACK --- */
   /*
    * The signature. Films laid over the same field of account marks, composited
    * with multiply. `isolation: isolate` scopes the blend to the window, so the
-   * films multiply against the star field and each other rather than against
+   * films multiply against the mark field and each other rather than against
    * the whole page.
    */
 
@@ -570,7 +692,7 @@
     position: relative;
     isolation: isolate;
     background: var(--lb-white);
-    border: 1px solid var(--rule);
+    border: 2px solid var(--ink);
     aspect-ratio: 4 / 3;
     overflow: hidden;
   }
@@ -584,8 +706,8 @@
   /* A single film drawn apart from the stack, carrying its own observation. */
   .film-row {
     position: relative;
-    border: 1px solid var(--rule-soft);
-    padding: 0.6rem 0.75rem;
+    border: 2px solid var(--ink);
+    padding: 0.6rem 0.75rem 0.6rem 0.95rem;
     background: var(--sheet);
   }
   .film-row::before {
@@ -607,25 +729,28 @@
     left: 0;
     top: 0;
     bottom: 0;
-    width: 3px;
-    background: var(--film-edge-colour, var(--rule));
+    width: 6px;
+    border-right: 2px solid var(--ink);
+    background: var(--film-edge-colour, var(--rule-soft));
   }
 
   /* ------------------------------------------------------------ GRAPH --- */
 
   .g-node {
     cursor: pointer;
-    transition: stroke-width 120ms ease;
+    transition: stroke-width 120ms steps(2, end);
   }
   .g-node:hover {
-    stroke-width: 3;
+    stroke-width: 4;
   }
 
   .g-edge {
-    transition: stroke-opacity 120ms ease, stroke-width 120ms ease;
+    transition:
+      stroke-opacity 120ms steps(2, end),
+      stroke-width 120ms steps(2, end);
   }
   .g-edge:hover {
-    stroke-width: 3;
+    stroke-width: 3.5;
     stroke-opacity: 1;
   }
 
@@ -636,40 +761,329 @@
     stroke-dasharray: 5 4;
   }
 
-  /* ------------------------------------------------------ HERO FILMS --- */
-
-  /*
-   * The one moment of motion on the landing page: three films settling into
-   * register. Pure CSS on three divs, `both` fill so the end state is the
-   * resting state, and cancelled entirely under reduced motion — where the
-   * films are simply already in place rather than invisible.
-   */
-  .film-settle {
-    animation: film-settle 620ms cubic-bezier(0.2, 0.8, 0.3, 1) both;
-  }
-
   /* ------------------------------------------------------------ EMPTY --- */
 
   .empty {
-    border: 1px dashed var(--rule);
+    border: 2px dashed var(--ink);
     background: var(--sheet-2);
     padding: 2.25rem 1.5rem;
     text-align: center;
   }
+
+  /* ------------------------------------------------- ENTRANCE MOTION --- */
+
+  /*
+   * Rows and panels enter when their data does. Two ways in:
+   *
+   *   .stagger  on a container — every direct child enters in turn. The delay
+   *             ladder below stops at the fifteenth child and every later one
+   *             shares that delay, so a three-hundred-row table finishes in
+   *             350ms rather than in eight seconds. That cap is the entire
+   *             reason the ladder is written out rather than generated.
+   *   .reveal   on one element, with --d for its own delay.
+   *
+   * Both animate transform and opacity only, and both use `both` fill so the
+   * resting state is the visible one: an element whose animation never runs is
+   * on the page, not invisible.
+   */
+  .reveal,
+  .stagger > * {
+    animation: ink-in 260ms steps(3, end) both;
+    animation-delay: var(--d, 0ms);
+  }
+
+  .stagger > *:nth-child(1) {
+    --d: 0ms;
+  }
+  .stagger > *:nth-child(2) {
+    --d: 25ms;
+  }
+  .stagger > *:nth-child(3) {
+    --d: 50ms;
+  }
+  .stagger > *:nth-child(4) {
+    --d: 75ms;
+  }
+  .stagger > *:nth-child(5) {
+    --d: 100ms;
+  }
+  .stagger > *:nth-child(6) {
+    --d: 125ms;
+  }
+  .stagger > *:nth-child(7) {
+    --d: 150ms;
+  }
+  .stagger > *:nth-child(8) {
+    --d: 175ms;
+  }
+  .stagger > *:nth-child(9) {
+    --d: 200ms;
+  }
+  .stagger > *:nth-child(10) {
+    --d: 225ms;
+  }
+  .stagger > *:nth-child(11) {
+    --d: 250ms;
+  }
+  .stagger > *:nth-child(12) {
+    --d: 275ms;
+  }
+  .stagger > *:nth-child(13) {
+    --d: 300ms;
+  }
+  .stagger > *:nth-child(14) {
+    --d: 325ms;
+  }
+  .stagger > *:nth-child(n + 15) {
+    --d: 350ms;
+  }
+
+  /* The older name for an entrance, kept because several components still ask
+     for it by that name. */
+  .film-settle {
+    animation: ink-in 300ms steps(3, end) both;
+  }
+
+  /* --------------------------------------------------------- MICRO-TYPE -- */
+
+  /* The panel number in the corner of a landing sheet, and the arrow between
+     two pipeline steps. Both are authored at 9px and both are floored to 11px
+     on phones, tablets and any coarse-pointer device — see the bottom of this
+     file. */
+  .pnum {
+    font-family: var(--type-mono);
+    font-size: 0.5625rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    color: var(--ink);
+    background: var(--film-y);
+    border: 2px solid var(--ink);
+    padding: 0.06rem 0.3rem;
+    flex: none;
+  }
+
+  .strut {
+    font-family: var(--type-mono);
+    font-size: 0.5625rem;
+    letter-spacing: 0.1em;
+  }
 }
 
 /* ==========================================================================
-   THE CURTAIN
+   THE INTRO
    ==========================================================================
-   Two sheets of film sliding apart off the light box. They start meeting in
-   the centre with a deliberate overlap, so the seam is the dark patch that
-   cyan over magenta makes, and the transition begins by splitting exactly the
-   thing the product is about.
+   The landing route is a dark stage with a canvas in it and four scenes of
+   copy over the top, then a hand-off: the last scroll of the stage prints the
+   page and the console's own paper ground takes over.
 
-   The panels are OFF-SCREEN at rest. Their base transform puts them there and
-   the animation runs from on-screen back to that base, so a page sitting still
-   has nothing covering it. The container is pointer-events: none permanently —
-   a curtain that swallows a click is worse than no curtain at all.
+   The canvas is scrolled by a passive listener that writes one number into a
+   ref and reads nothing from the DOM; a requestAnimationFrame loop does all
+   the drawing. The scene copy is switched by IntersectionObserver, not by
+   measuring anything in the scroll handler. Nothing in this section reads
+   layout during a scroll event.
+   ========================================================================== */
+
+.intro-stage {
+  position: relative;
+  background: var(--void);
+}
+
+.intro-sticky {
+  position: sticky;
+  top: 0;
+  height: 100svh;
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+}
+
+.intro-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* Scene copy sits over the canvas. Only the active one is at opacity 1; the
+   rest are transform-shifted and transparent, never display:none, so the
+   layout never reflows as the scene changes. */
+.intro-scene {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  align-content: center;
+  pointer-events: none;
+  /* A scrim from the left, so the copy is readable over the moving screen
+     without hiding the web it is describing. */
+  background: linear-gradient(
+    100deg,
+    rgba(11, 10, 18, 0.94) 0%,
+    rgba(11, 10, 18, 0.82) 34%,
+    rgba(11, 10, 18, 0.28) 62%,
+    rgba(11, 10, 18, 0) 82%
+  );
+  opacity: 0;
+  transform: translate3d(0, 14px, 0);
+  transition:
+    opacity 200ms steps(3, end),
+    transform 200ms steps(3, end);
+}
+
+.intro-scene[data-on="true"] {
+  opacity: 1;
+  transform: none;
+  pointer-events: auto;
+}
+
+/*
+ * Reduced motion. The stage stops being four screens tall and stops being
+ * sticky, the canvas becomes a still of the finished web behind the copy, and
+ * the four scenes stack down the page as ordinary sections. Nothing is hidden
+ * from a reader who cannot take the scroll sequence — they get the same four
+ * pieces of copy, just at once.
+ */
+.intro-sticky[data-reduced="true"] {
+  position: static;
+  height: auto;
+  display: block;
+  padding-block: 4rem;
+}
+
+.intro-sticky[data-reduced="true"] .intro-canvas {
+  position: absolute;
+  opacity: 0.55;
+}
+
+.intro-sticky[data-reduced="true"] .intro-scene {
+  position: relative;
+  inset: auto;
+  display: block;
+  opacity: 1;
+  transform: none;
+  pointer-events: auto;
+  padding-block: 2.25rem;
+}
+
+.intro-cue {
+  animation: nudge 1400ms steps(4, end) infinite;
+}
+
+/* Display type on the dark stage: a heavier ghost, because the plates are
+   further out of register in the dark and because it has to read over a
+   moving canvas. */
+.intro-title {
+  color: #fdfbf4;
+  text-shadow:
+    -0.05em -0.014em 0 var(--film-c),
+    0.05em 0.014em 0 var(--film-m);
+}
+
+/* ==========================================================================
+   KEYFRAMES
+   ========================================================================== */
+
+/* An element arriving on the page: short, from below, slightly under-scaled,
+   in three held frames. Transform and opacity only. */
+@keyframes ink-in {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 9px, 0) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* The action word in the page transition. Snaps in over-size, settles, goes. */
+@keyframes thwip {
+  0% {
+    opacity: 0;
+    transform: translate3d(-50%, -50%, 0) scale(0.4) rotate(-14deg);
+  }
+  24% {
+    opacity: 1;
+    transform: translate3d(-50%, -50%, 0) scale(1.12) rotate(-7deg);
+  }
+  62% {
+    opacity: 1;
+    transform: translate3d(-50%, -50%, 0) scale(1) rotate(-7deg);
+  }
+  100% {
+    opacity: 0;
+    transform: translate3d(-50%, -50%, 0) scale(1.02) rotate(-7deg);
+  }
+}
+
+@keyframes gutter-l {
+  0% {
+    transform: translate3d(0, 0, 0);
+  }
+  22% {
+    transform: translate3d(0, 0, 0);
+  }
+  100% {
+    transform: translate3d(-106%, 0, 0);
+  }
+}
+
+@keyframes gutter-r {
+  0% {
+    transform: translate3d(0, 0, 0);
+  }
+  22% {
+    transform: translate3d(0, 0, 0);
+  }
+  100% {
+    transform: translate3d(106%, 0, 0);
+  }
+}
+
+/* The catch-rings of the loading web, marching outward. stroke-dashoffset is
+   not a compositor property, but this is four 120px circles on a route that
+   exists for at most a few hundred milliseconds, and the alternative — a
+   transform on each ring — rotates the dashes instead of running them. */
+@keyframes web-march {
+  to {
+    stroke-dashoffset: -26;
+  }
+}
+
+.web-march {
+  animation: web-march 900ms steps(6, end) infinite;
+}
+
+/* The scroll cue under the intro. Two held positions, not a glide. */
+@keyframes nudge {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+  50% {
+    transform: translate3d(0, 6px, 0);
+  }
+}
+
+/* ==========================================================================
+   THE TRANSITION — PANEL GUTTERS
+   ==========================================================================
+   Leaving a page closes the panel; arriving opens it. Three black bands lie
+   across the viewport and pull off in alternating directions on a step timer,
+   each with a cyan edge on top and a magenta edge below so the plates read as
+   out of register while they move. A yellow action word snaps over them.
+
+   Three properties this has to hold, and does:
+
+     1. It never eats a click. `.curtain` is pointer-events: none here, with no
+        state anywhere in the app that turns it back on.
+     2. It does not run on first paint. The component tracks the previous
+        pathname in a ref, and the first render only records it.
+     3. It cannot leave the screen covered. Every band's BASE transform is
+        off-screen, and its animation runs from on-screen back to that base
+        with `both` fill. A band whose animation is cancelled — reduced motion,
+        a navigation that never lands, a throw mid-transition — sits at its
+        base, which is off the screen.
    ========================================================================== */
 
 .curtain {
@@ -680,69 +1094,66 @@
   overflow: hidden;
 }
 
-.curtain-panel {
+.curtain-band {
   position: absolute;
-  top: 0;
-  bottom: 0;
-  width: 54%;
-  mix-blend-mode: multiply;
+  left: -3%;
+  width: 106%;
+  height: 34.5%;
+  background: var(--ink);
+  border-top: 3px solid var(--film-c);
+  border-bottom: 3px solid var(--film-m);
   will-change: transform;
 }
 
-.curtain-l {
-  left: 0;
-  background: var(--film-c);
-  border-right: 1px solid var(--ink);
-  transform: translate3d(-101%, 0, 0);
-  animation: curtain-part-l 420ms cubic-bezier(0.62, 0.02, 0.2, 1) forwards;
+.curtain-b1 {
+  top: 0;
+  transform: translate3d(-106%, 0, 0);
+  animation: gutter-l 460ms steps(6, end) both;
+}
+.curtain-b2 {
+  top: 33%;
+  transform: translate3d(106%, 0, 0);
+  animation: gutter-r 460ms steps(6, end) 55ms both;
+}
+.curtain-b3 {
+  top: 66%;
+  transform: translate3d(-106%, 0, 0);
+  animation: gutter-l 460ms steps(6, end) 110ms both;
 }
 
-.curtain-r {
-  right: 0;
-  background: var(--film-m);
-  border-left: 1px solid var(--ink);
-  transform: translate3d(101%, 0, 0);
-  animation: curtain-part-r 420ms cubic-bezier(0.62, 0.02, 0.2, 1) forwards;
-}
-
-@keyframes curtain-part-l {
-  0% {
-    transform: translate3d(0, 0, 0);
-  }
-  18% {
-    transform: translate3d(0, 0, 0);
-  }
-  100% {
-    transform: translate3d(-101%, 0, 0);
-  }
-}
-
-@keyframes curtain-part-r {
-  0% {
-    transform: translate3d(0, 0, 0);
-  }
-  18% {
-    transform: translate3d(0, 0, 0);
-  }
-  100% {
-    transform: translate3d(101%, 0, 0);
-  }
-}
-
-@keyframes film-settle {
-  from {
-    transform: translate3d(-6%, -5%, 0) scale(0.97);
-    opacity: 0;
-  }
-  to {
-    transform: none;
-    opacity: 1;
-  }
+.curtain-word {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate3d(-50%, -50%, 0) scale(0.4) rotate(-14deg);
+  opacity: 0;
+  font-family: var(--type-sans);
+  font-weight: 900;
+  font-size: clamp(2.25rem, 13vw, 6rem);
+  letter-spacing: -0.03em;
+  color: var(--film-y);
+  -webkit-text-stroke: 3px var(--ink);
+  paint-order: stroke fill;
+  white-space: nowrap;
+  animation: thwip 520ms steps(5, end) both;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .curtain-l,
-  .curtain-r,
+  /*
+   * Everything with a step timer is cancelled rather than shortened. The
+   * curtain bands fall back to their base transform, which is off-screen; the
+   * entrances fall back to their `to` frame, which is the element in place at
+   * full opacity; the intro canvas is told separately, in JavaScript, to paint
+   * its final frame once and stop.
+   */
+  .curtain-b1,
+  .curtain-b2,
+  .curtain-b3,
+  .curtain-word,
+  .intro-cue,
+  .web-march,
+  .reveal,
+  .stagger > *,
   .film-settle {
     animation: none !important;
   }
@@ -816,7 +1227,7 @@ body {
    A page title at a fixed 1.75rem and a metric figure at a fixed 1.5rem both
    break lines at 360px. Ceilings are the sizes that shipped. */
 .dsp-page {
-  font-size: clamp(1.25rem, 1rem + 2.2vw, 1.75rem);
+  font-size: clamp(1.25rem, 1rem + 2.4vw, 1.9rem);
 }
 
 .fig {
@@ -886,9 +1297,9 @@ body {
 /* 8 — THE NAV, BELOW ~720px, IS A SCROLLING STRIP.
    Nine section names wrapped instead of scrolled push the masthead to three
    lines and shove the first sheet off the opening screen. It already scrolls
-   at every width; below 720px it loses its scrollbar chrome and the
-   registration target beside the wordmark, which is decoration that costs
-   horizontal room on the one row that cannot afford it. */
+   at every width; below 720px it loses its scrollbar chrome and the web target
+   beside the wordmark, which is decoration that costs horizontal room on the
+   one row that cannot afford it. */
 .nav-strip {
   flex-wrap: nowrap;
   overflow-x: auto;
@@ -910,8 +1321,8 @@ body {
     width: 0;
   }
 
-  /* The plate-maker's registration target in the masthead. Decorative, and
-     `aria-hidden` already, so removing it costs a reader nothing. */
+  /* The web target in the masthead. Decorative, and `aria-hidden` already, so
+     removing it costs a reader nothing. */
   .masthead .reg {
     display: none;
   }
@@ -1067,5 +1478,15 @@ body {
   [class*="text-[0.5625rem]"],
   [class*="text-[9px]"] {
     font-size: 0.6875rem !important;
+  }
+
+  /* Added by the Spider-Verse pass. `.pnum` is the panel number that runs down
+     the left edge of a sheet on the landing page and `.strut` is the label on
+     an intro web strand; both are authored at 9px like everything else in this
+     list, and both need the same floor. */
+  .pnum,
+  .strut {
+    font-size: 0.6875rem !important;
+    letter-spacing: 0.1em;
   }
 }

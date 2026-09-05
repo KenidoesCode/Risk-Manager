@@ -380,7 +380,7 @@ export function OverlayStack({
       </header>
 
       <div className="sheet-bd">
-        <div className="grid gap-6 md:grid-cols-2">
+        <div className="stagger grid gap-6 md:grid-cols-2">
           {/* ------------------------------------------- COORDINATION --- */}
           <div>
             <div className="mb-2 flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
@@ -446,7 +446,7 @@ export function OverlayStack({
         </div>
 
         {/* ------------------------------------------- FILMS, APART ---- */}
-        <div className="mt-7 grid gap-6 md:grid-cols-2">
+        <div className="stagger mt-7 grid gap-6 md:grid-cols-2">
           <div>
             <p className="cap mb-2">The coordination films, drawn apart</p>
             {contributing.length === 0 ? (

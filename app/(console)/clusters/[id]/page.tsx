@@ -179,7 +179,7 @@ export default async function ClusterDetailPage({ params }: { params: Promise<{ 
                       <th>Detail</th>
                     </tr>
                   </thead>
-                  <tbody>
+                  <tbody className="stagger">
                     {timeline.slice(0, TIMELINE_ROWS).map((e, i) => (
                       <tr key={i}>
                         <td className="num text-[0.6875rem] t-3">

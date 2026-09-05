@@ -16,7 +16,7 @@ export default function DemoPage() {
     <>
       <Heading kicker="Check the detector">Scenarios</Heading>
 
-      <p className="note mb-6 max-w-3xl">
+      <p className="capbox mb-7 max-w-3xl">
         Each scenario builds a small isolated graph and runs it through the same clustering, feature
         and scoring code a detection run uses. The outcome is checked against a stated expectation on
         the server. A scenario whose expectation stops holding reports DEVIATED here and fails{" "}

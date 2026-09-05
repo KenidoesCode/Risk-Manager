@@ -6,16 +6,14 @@ import { usePathname } from "next/navigation";
 /**
  * The masthead.
  *
- * A light table has no navigation rail; it has a strip of information printed
- * along the edge of the sheet. So the shell is a thin bar carrying the name, a
- * registration target, the two counts that are actually live on this instance,
- * and the sections as tabs. Under it runs a process control strip, which is
- * the divider a prepress sheet actually has.
+ * A comic page carries its title along the top of the first panel and its
+ * indicia in small type beside it, so the shell is a strip: the name, a web
+ * target, the two counts that are actually live on this instance, and the
+ * sections as small panels you can push. Under it runs the four-colour bar,
+ * which is the legend for every colour used anywhere below it.
  *
- * The current tab is a yellow film laid over it. That is the same compositing
- * mechanism as the signature element on the cluster page, at its smallest
- * possible scale, so a reader meets the language once in the chrome before it
- * has to carry an argument.
+ * The current section is a filled yellow panel — the same yellow the caption
+ * boxes use, meaning the same thing.
  */
 
 const SECTIONS = [
@@ -51,10 +49,7 @@ export function Masthead({ openClusters, pendingReviews }: { openClusters: numbe
         <span className="cap ml-auto hidden sm:inline-block">Detect only · never enforces</span>
       </div>
 
-      <nav
-        aria-label="Sections"
-        className="nav-strip page flex gap-0.5 pb-2"
-      >
+      <nav aria-label="Sections" className="nav-strip page flex gap-1 pb-2.5">
         {SECTIONS.map((section) => {
           const active = pathname === section.href || pathname.startsWith(`${section.href}/`);
           return (

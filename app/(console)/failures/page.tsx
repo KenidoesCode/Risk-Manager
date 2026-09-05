@@ -24,13 +24,13 @@ export default async function FailuresPage() {
     <>
       <Heading kicker="Check the detector">Failure modes</Heading>
 
-      <p className="note mb-6 max-w-3xl">
+      <p className="capbox mb-7 max-w-3xl">
         Every failure path here reduces what the system claims or routes the decision to a person.
         None of them defaults to a detection. The counts are actual audit events from this instance -
         a category showing zero has genuinely not occurred, not been hidden.
       </p>
 
-      <div className="grid gap-4 md:grid-cols-2">
+      <div className="stagger grid gap-4 md:grid-cols-2">
         {categories.map(([key, c]) => (
           <article
             key={key}
@@ -69,7 +69,7 @@ export default async function FailuresPage() {
                   <th>Time</th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody className="stagger">
                 {summary.recent.map((e) => (
                   <tr key={e.id}>
                     <td className="num text-[0.625rem] t-3">{e.sequence}</td>

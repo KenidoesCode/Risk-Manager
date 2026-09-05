@@ -6,6 +6,16 @@ const nextConfig: NextConfig = {
   async headers() {
     // Security headers. This console renders agent-supplied text (responses,
     // tool arguments), so a restrictive CSP and nosniff are not decorative.
+    //
+    // 'unsafe-eval' is added in DEVELOPMENT ONLY: Next.js's dev bundler wraps
+    // every module in eval() for source maps, so without it a `npm run dev`
+    // instance has its entire client runtime blocked by this CSP — no
+    // hydration, no interactivity, an error on every page. A production build
+    // uses no eval, so the deployed policy stays strict.
+    const isDev = process.env.NODE_ENV === "development";
+    const scriptSrc = isDev
+      ? "script-src 'self' 'unsafe-inline' 'unsafe-eval'"
+      : "script-src 'self' 'unsafe-inline'";
     return [
       {
         source: "/:path*",
@@ -18,7 +28,7 @@ const nextConfig: NextConfig = {
             key: "Content-Security-Policy",
             value: [
               "default-src 'self'",
-              "script-src 'self' 'unsafe-inline'",
+              scriptSrc,
               "style-src 'self' 'unsafe-inline'",
               "img-src 'self' data:",
               "connect-src 'self'",
