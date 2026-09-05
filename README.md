@@ -1,416 +1,1124 @@
-# Return-Abuse Ring Sentinel
+# Risk Manager
 
-Six accounts. Each returns about a third of what it buys — a rate no per-account
-rule would flag, and none should.
+> **Graph-based detection of coordinated return abuse — without flagging the households that legitimately share infrastructure.**
 
-Seen together they operate through two devices, ship to one address, pay with two
-cards, buy in one product category, and return inside the same eight hours.
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.x-blue?logo=typescript)](https://www.typescriptlang.org/)
+[![Next.js](https://img.shields.io/badge/Next.js-App_Router-black?logo=next.js)](https://nextjs.org/)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Drizzle-336791?logo=postgresql)](https://www.postgresql.org/)
+![Tests](https://img.shields.io/badge/tests-87_passing-success)
+![Build](https://img.shields.io/badge/build-26_routes-success)
+![Mode](https://img.shields.io/badge/mode-detect--only-critical)
 
-**The pattern exists only in the connections.** That is what this system finds.
+---
 
-It also refuses to flag a family for living together. That is the harder half.
+## The problem
+
+Six accounts.
+
+Each returns roughly a third of what it buys.
+
+Individually, none looks unusual enough to flag.
+
+But together:
+
+* they operate through **two devices**
+* ship to **one address**
+* use **two payment cards**
+* purchase within **one product category**
+* and return items within the **same eight-hour window**
+
+The suspicious pattern does not exist inside any single account.
+
+**It exists in the connections.**
+
+That is what this system detects.
+
+But there is a harder problem:
+
+> A family, office, or group of flatmates can have almost exactly the same shared infrastructure.
+
+A useful risk system therefore needs to answer two questions separately:
+
+1. **Does this cluster exhibit coordinated return behaviour?**
+2. **Is there enough evidence to distinguish coordination from legitimate shared living or working arrangements?**
+
+This project is designed around both.
+
+---
+
+## What it does
 
 ```text
-INGEST → RESOLVE ENTITIES → BUILD GRAPH → CLUSTER → FEATURES → RISK + CONFIDENCE → HUMAN REVIEW → AUDIT
+INGEST
+   │
+   ▼
+ENTITY RESOLUTION
+   │
+   ▼
+BUILD ENTITY GRAPH
+   │
+   ▼
+CLUSTER
+   │
+   ▼
+COMPUTE FEATURES
+   │
+   ├───────────────┐
+   ▼               ▼
+RISK SCORE     CONFIDENCE
+   │               │
+   └───────┬───────┘
+           ▼
+      HUMAN REVIEW
+           │
+           ▼
+          AUDIT
 ```
 
----
+The system builds a graph from commerce activity, identifies connected account clusters, computes behavioural and structural signals, separates **risk** from **confidence**, and gives an investigator an explainable answer.
 
-## Quickstart
+It does **not** block customers.
 
-```bash
-npm install
-cp .env.example .env
+It does **not** deny refunds.
 
-npm run db:migrate     # PGlite — no server needed
-npm run db:seed        # 4,635 entities · 1,275 accounts · 120 labelled groups
-npm run detect         # cluster, score, print the full signal breakdown
-npm run demo           # 6/6 scenarios behave as specified
-npm run evaluate       # held-out metrics, threshold chosen on dev
-npm run dev            # console at localhost:3000
-```
+It does **not** suspend accounts.
+
+It does **not** autonomously enforce a fraud decision.
 
 ---
 
-## Verified from a clean environment
+# Measured results
 
-| Command | Result |
-|---|---|
-| `npm run typecheck` | clean |
-| `npm run lint` | clean |
-| `npm test` | **87 tests passing** (4 files) |
-| `npm run build` | succeeds — 26 routes |
-| `npm run demo` | **6/6 scenarios behaved as specified** |
-| `npm run evaluate` | produced the held-out numbers below |
+The held-out evaluation contains:
 
-All ten console pages render against a live server (HTTP 200). The enforcement
-refusal, the evasion refusal and the cluster-subgraph endpoint were all exercised
-against the running build.
+* **24 labelled groups**
+* **12 suspicious rings**
+* **12 benign hard negatives**
+* **251 accounts**
+* threshold selected on the development split
+* deterministic seed `20260301`
+
+### Held-out comparison
+
+| Metric                    |     Graph Detector | Account Baseline |
+| ------------------------- | -----------------: | ---------------: |
+| Ring precision            | **100.0% (12/12)** |    70.6% (12/17) |
+| Ring recall               | **100.0% (12/12)** |   100.0% (12/12) |
+| F1                        |         **1.0000** |           0.8276 |
+| False-positive rate       |    **0.0% (0/12)** |     41.7% (5/12) |
+| Household false positives |              **0** |            **5** |
+
+At account level, the graph detector achieved:
+
+**100% precision (93/93)**
+**100% recall (93/93)**
+
+The most important comparison is not the perfect F1.
+
+It is this:
+
+> **The account baseline recommended five benign households for fraud investigation. The graph detector recommended zero.**
+
+That is the demonstrated precision advantage of the system on this corpus.
 
 ---
 
-## Measured results
+# Important: the perfect F1 is not the headline
 
-Held-out split, 24 labelled groups (12 suspicious rings, 12 benign hard
-negatives), 251 accounts, seed 20260301. **The operating threshold was selected
-on the dev split**, not on held-out.
+An F1 of `1.0000` on this held-out synthetic corpus should **not** be interpreted as real-world detector performance.
 
-| | Graph detector | Account baseline |
-|---|---|---|
-| Ring precision | **100.0%** (12/12) | 70.6% (12/17) |
-| Ring recall | **100.0%** (12/12) | 100.0% (12/12) |
-| F1 | **1.0000** | 0.8276 |
-| False-positive rate | **0.0%** (0/12) | 41.7% (5/12) |
-| Household false positives | **0** | 5 |
+The dataset was generated by the same author who designed the ten features, and those features separate the synthetic classes cleanly.
 
-Account level, graph detector: precision 100% (93/93), recall 100% (93/93).
+So the honest interpretation is:
 
-Per-template hard-negative false-positive rates — **all zero**:
+> **The experiment demonstrates the detector's ability to avoid the specific household false positives represented in this corpus. It does not establish production-level performance on real return-abuse data.**
 
-| Template | Groups | FP | Mean risk |
-|---|---|---|---|
-| FAMILY_HOUSEHOLD | 3 | 0 | 42.5 |
-| CORPORATE_PROCUREMENT | 3 | 0 | 41.1 |
-| SHARED_APARTMENT | 3 | 0 | 37.6 |
-| OFFICE_NETWORK | 3 | 0 | 33.2 |
+The baseline comparison remains useful because both approaches were evaluated against the same rings and denominators.
 
-### A perfect F1 is a statement about the corpus, not the detector
+---
 
-**Read this before believing the table above.** An F1 of 1.0000 on held-out data
-almost always means the task is too easy, and here it does. The corpus is
-synthetic and generated by the same author who chose the ten features; the
-feature set separates these two classes cleanly. It does not follow that it
-would separate real return-abuse rings from real households.
+# The harder problem: don't flag households
 
-What the numbers *do* support is the comparison. Both detectors saw the same
-rings with the same denominators, and the baseline was tuned on the same split
-with the same cost ratio rather than left as a straw man. The baseline flagged
-**5 of 12 benign groups** — five households recommended for fraud investigation
-because they share an address. The graph detector flagged none. That gap is the
-finding.
-
-### Coordination recovery — an honest negative
-
-The spec asks for a specific metric: of the rings an account-level baseline
-misses, how many does the graph recover? On this split:
+A naive detector can learn:
 
 ```text
-suspicious rings                   12
-detected by the account baseline   12
-MISSED by the account baseline      0
-recovery rate                       — (0/0)
+shared address
+      +
+shared device
+      +
+shared payment method
+      =
+fraud
 ```
 
-**The baseline missed nothing, so there was nothing to recover.** On an earlier
-run with a different corpus the figure was 1/1, which is a sample of one and
-proves little either way.
+That is exactly the behaviour this project is designed to prevent.
 
-That is a negative result for the *recall* half of the product thesis, and it is
-reported here rather than quietly dropped. The graph's demonstrated value on this
-corpus is precision — specifically, not accusing households.
+Roughly half of the clustered population is deliberately benign and structurally similar to a ring:
 
-The metric stays because it is the metric that can falsify the claim, and the
-console reports `graphMissedBaselineCaught` beside it, because a recovery rate
-quoted without the cases going the other way is a half-truth.
+* shared addresses
+* shared devices
+* sometimes shared cards
 
----
+The difference has to come from **behaviour**, not simply infrastructure.
 
-## Why a graph and not a transaction classifier
+## Three protections
+
+### 1. Structural signals cannot win alone
+
+Address sharing contributes only **4 points out of 100**.
+
+Payment sharing contributes **14 points**.
+
+All structural signals combined contribute only **34 points**, while the detection threshold is **70**.
+
+Therefore:
 
 ```text
-Account A:  6 orders, 2 returns   — normal
-Account B:  7 orders, 2 returns   — normal
-Account C:  5 orders, 2 returns   — normal
+STRUCTURE ALONE
+      ↓
+cannot reach
+      ↓
+RISK THRESHOLD
 ```
 
-Individually unremarkable. Together: same address, same device, same payment
-fingerprint, same product category, returns within the same window.
+### 2. Behavioural evidence guardrail
 
-A row-level classifier sees rows. The graph sees the relationship. The
-`LOW_INDIVIDUAL_HIGH_COLLECTIVE` ring template exists specifically to test that
-case — every member sits at an ordinary return rate that no per-account threshold
-catches without also catching thousands of honest customers.
+When behavioural evidence contributes fewer than **8 points**, the total score is explicitly capped below the detection threshold.
 
----
+No amount of shared:
 
-## The part that matters more: not flagging households
+* addresses
+* devices
+* cards
 
-A detector that learns `shared address = fraud` scores beautifully on a corpus of
-rings-plus-random-noise, and is useless in production, because the overwhelming
-majority of shared-address clusters are families, flatmates and offices.
+can independently produce a ring verdict.
 
-So roughly half the clustered population in this corpus is deliberately benign
-and **structurally identical to a ring**: same shared devices, same shared
-address, sometimes the same shared card. Only behaviour separates them.
-
-Three controls follow from that:
-
-**1. Address sharing is worth 4 points out of 100.** Payment sharing — a
-deliberate act between people who know each other — is worth 14. The full weight
-table is published at `/signals` and in `src/scoring/risk.ts`.
-
-**2. The structural-only guardrail.** Structural signals total 34 points. Even
-saturated they cannot reach the threshold of 70. And when behavioural evidence
-contributes fewer than 8 points, the score is *explicitly capped* below the
-threshold regardless. No combination of shared address, shared device and shared
-card produces a detection on its own. Every time the cap fires it is written to
-the audit trail as `GUARDRAIL_APPLIED`, so the reader can count how often the
-system protected a household.
-
-**3. Counter-signals on every cluster.** The legitimate explanations that fit the
-same evidence are computed and displayed whether or not the risk score is high,
-and each one lowers confidence. A detection presented without them is one a
-reviewer cannot properly evaluate.
-
-The `legitimate-household` demo scenario is the test: four accounts, one address,
-two shared devices, **one shared card** — every structural signal a ring has —
-with a 12% return rate across a year and eight categories. It scores 54.3
-(structural 30.7, behavioural 23.6) and is not flagged.
-
----
-
-## Risk and confidence are different numbers
+Every guardrail activation is recorded as:
 
 ```text
-Risk 91 · Confidence 63%
+GUARDRAIL_APPLIED
 ```
 
-means the pattern looks strongly coordinated **and** the detector is not sure the
-interpretation is right. Collapsing those into a single 77 destroys the only
-information an analyst needs to prioritise.
+in the audit trail.
 
-Confidence measures *input quality* — how much evidence exists, how reliable its
-provenance, whether the cluster survives re-clustering, how many legitimate
-explanations fit. It is deliberately independent of which way the score points.
+### 3. Counter-signals are always computed
 
-`INSUFFICIENT_DATA` is a real answer, not a failure to produce one. Three accounts
-with one order each cannot distinguish coordination from coincidence, and the
-detector says so rather than guessing.
+The system also asks:
 
----
+> What legitimate explanation could produce this same structure?
 
-## Inferred links are never drawn as facts
+Those explanations are shown to the reviewer and reduce confidence.
 
-`ACCOUNT_A --USES--> DEVICE_X` is an observation: an event said so.
-
-`ACCOUNT_A <-SHARES_DEVICE-> ACCOUNT_B` is an **inference** this system drew by
-noticing both accounts touched the same node.
-
-They live in separate edge classes, carry `derived: true` and a `viaEntityId`
-pointing at the shared node, and the graph view draws them differently —
-dashed magenta for inferred, solid cyan for observed — with no exception. Clicking
-an inferred edge names the node the inference came from, so a reviewer can always
-walk from a conclusion back to an observation.
-
-There is **no fuzzy matching**. No edit distance on addresses, no near-duplicate
-email detection. Two accounts are linked when they touched the *same* anonymised
-hash. Where the data does not support an exact link, this system records no link,
-because the cost of a wrong merge here is a real person investigated for fraud
-because their street name resembles someone else's.
-
-### The fanout guard
-
-An infrastructure node touched by more than 40 accounts is skipped entirely. A
-"device" seen by 400 accounts is a default value or a shared network egress, not a
-family tablet — and connecting those accounts pairwise would produce 79,800 edges
-and one meaningless mega-cluster. This is the single most important guard in the
-builder; without it the graph collapses.
+A high risk score without its legitimate alternatives would be much harder to evaluate safely.
 
 ---
 
-## Two clustering methods, because they fail differently
+# The household test
 
-**Shared-entity** (connected components over derived edges) is exact and
-explainable — every member is reachable through a chain of concrete links a
-reviewer can walk. It chains: one flatmate sharing an address with a ring member
-drags an unrelated household in.
+The `legitimate-household` scenario deliberately gives the detector almost everything a ring has:
 
-**Louvain** cuts those weak bridges. It is unstable: modularity has many
-near-optimal partitions, and a different node ordering can produce a different
-answer on the same data.
+* 4 accounts
+* 1 shared address
+* 2 shared devices
+* **1 shared card**
+* 12% return rate
+* 8 product categories
 
-Stability is therefore *measured*, not assumed. Each cluster is re-clustered under
-rotated node orderings and scored by Jaccard overlap. A cluster that dissolves is
-an artefact of iteration order rather than a structure in the data, and presenting
-it as "these seven accounts are connected" would be presenting an accident. Low
-stability lowers confidence and routes to review; it never raises the score.
+Result:
 
----
+```text
+Risk:        54.3
+Structural:  30.7
+Behavioural: 23.6
 
-## The model writes prose and nothing else
+Verdict: NOT FLAGGED
+```
 
-It receives computed signals — names, numbers, weights, observations — and turns
-them into sentences. It does not see the graph, cannot introduce a signal the
-scorer did not compute, cannot alter a number, and cannot state a verdict.
-
-Enforced after the call, not requested in the prompt:
-
-- A `signalType` outside the computed set → **entire response discarded**.
-- Verdict language anywhere in the response → **entire response discarded**.
-- The risk score and confidence are never read from the model.
-
-The deterministic explanation is generated **first**, on every cluster, so the
-model is an upgrade to a working output rather than a dependency of one. With
-`LLM_PROVIDER=none` — as in this build — every figure in the console and every
-number in this README is deterministic.
+The detector is intentionally refusing to turn shared living infrastructure into a fraud accusation.
 
 ---
 
-## No enforcement path
+# Why a graph?
 
-`POST /api/enforce` exists **in order to refuse**:
+Consider three accounts:
+
+```text
+Account A → 6 orders, 2 returns
+Account B → 7 orders, 2 returns
+Account C → 5 orders, 2 returns
+```
+
+Individually:
+
+```text
+A = normal
+B = normal
+C = normal
+```
+
+But the graph reveals:
+
+```text
+              DEVICE
+             /      \
+        Account A  Account B
+           |          |
+        ADDRESS     CARD
+           \          /
+            Account C
+                |
+           PRODUCT CATEGORY
+                |
+          RETURN TIME WINDOW
+```
+
+The individual return rates are not enough.
+
+The **relationship structure** is.
+
+The project explicitly includes a:
+
+```text
+LOW_INDIVIDUAL_HIGH_COLLECTIVE
+```
+
+ring template to test this case.
+
+---
+
+# Risk ≠ Confidence
+
+The system deliberately keeps two numbers separate.
+
+```text
+Risk:       91
+Confidence: 63%
+```
+
+These mean different things.
+
+### Risk
+
+How strongly the observed behaviour resembles coordinated return abuse.
+
+### Confidence
+
+How trustworthy the interpretation is.
+
+Confidence incorporates factors such as:
+
+* evidence quantity
+* evidence provenance
+* clustering stability
+* competing legitimate explanations
+* quality of the underlying observations
+
+A cluster can therefore have:
+
+```text
+HIGH RISK
++
+LOW CONFIDENCE
+```
+
+and correctly go to human review.
+
+---
+
+# `INSUFFICIENT_DATA` is a real answer
+
+The system does not force every cluster into:
+
+```text
+RISKY
+SAFE
+```
+
+For example:
+
+```text
+3 accounts
+1 order each
+little behavioural history
+```
+
+may simply not contain enough evidence.
+
+The detector returns:
+
+```text
+INSUFFICIENT_DATA
+```
+
+rather than inventing certainty.
+
+This distinction matters because a risk system should be allowed to say:
+
+> **We don't know yet.**
+
+---
+
+# Inferred links are never presented as facts
+
+There is a strict distinction between observations and derived relationships.
+
+### Observation
+
+```text
+ACCOUNT_A --USES--> DEVICE_X
+```
+
+An event explicitly states this relationship.
+
+### Inference
+
+```text
+ACCOUNT_A <-SHARES_DEVICE-> ACCOUNT_B
+```
+
+The system inferred this because both accounts touched the same entity.
+
+Derived edges therefore carry:
+
+```text
+derived: true
+viaEntityId: <shared entity>
+```
+
+and are rendered differently from observed edges.
+
+The reviewer can click an inferred relationship and trace it back to the entity that produced the inference.
+
+This creates a simple rule:
+
+> **Every conclusion must be traceable back to an observation.**
+
+---
+
+# No fuzzy entity resolution
+
+There is deliberately no:
+
+* address edit distance
+* near-duplicate email matching
+* fuzzy name matching
+* approximate identity merge
+
+Two accounts are connected when they touched the **same anonymised entity hash**.
+
+If the data does not support an exact connection:
+
+```text
+NO LINK
+```
+
+The reasoning is simple:
+
+> A wrong merge can cause one person to be investigated for another person's behaviour.
+
+In this problem, false linkage is more dangerous than missing a weak relationship.
+
+---
+
+# The fanout guard
+
+Infrastructure entities can become dangerously noisy.
+
+Imagine a "device" touched by 400 accounts.
+
+Pairwise linking those accounts would create:
+
+```text
+400 × 399 / 2 = 79,800
+```
+
+edges.
+
+That does not reveal a meaningful community.
+
+It creates a giant meaningless cluster.
+
+Therefore:
+
+```text
+ENTITY FANOUT > 40
+        ↓
+SKIP ENTITY
+```
+
+The fanout guard prevents shared infrastructure such as:
+
+* corporate networks
+* carrier NAT
+* default devices
+* shared infrastructure
+
+from collapsing the graph.
+
+---
+
+# Two clustering methods
+
+The system intentionally supports two clustering approaches because they fail differently.
+
+## Shared-entity clustering
+
+Connected components over derived relationships.
+
+Advantages:
+
+* deterministic
+* exact
+* easy to explain
+* every member has a concrete connection path
+
+Weakness:
+
+A weak bridge can connect an innocent household to a suspicious cluster.
+
+---
+
+## Louvain clustering
+
+Community detection can cut weak bridges and produce more meaningful communities.
+
+But Louvain has another problem:
+
+> **Partition stability is not guaranteed.**
+
+Different node orderings can produce different near-optimal partitions.
+
+So the system measures stability instead of assuming it.
+
+Clusters are re-clustered under rotated node orderings and compared using Jaccard overlap.
+
+```text
+HIGH STABILITY
+      ↓
+more confidence
+
+LOW STABILITY
+      ↓
+less confidence
+      ↓
+human review
+```
+
+Instability can reduce confidence.
+
+It can never increase risk.
+
+---
+
+# The AI boundary
+
+The language model is intentionally kept away from the decision boundary.
+
+It receives computed information such as:
+
+* signal names
+* values
+* weights
+* observations
+* explanations
+
+It then turns those facts into readable prose.
+
+It does **not**:
+
+* calculate risk
+* calculate confidence
+* inspect the graph directly
+* invent signals
+* modify numbers
+* choose the verdict
+* override the scoring engine
+
+The deterministic explanation is generated first.
+
+The model is an optional enhancement, not a dependency.
+
+With:
+
+```text
+LLM_PROVIDER=none
+```
+
+the entire evaluation remains deterministic.
+
+---
+
+# Model output is validated after generation
+
+The system does not rely on prompting alone.
+
+After the model responds:
+
+### Unknown signal
+
+If the model references a signal that was not actually computed:
+
+```text
+ENTIRE RESPONSE → DISCARDED
+```
+
+### Verdict language
+
+If the model attempts to make a verdict:
+
+```text
+ENTIRE RESPONSE → DISCARDED
+```
+
+### Numeric authority
+
+Risk and confidence are never read from model output.
+
+The model can write:
+
+```text
+"Three accounts share a device..."
+```
+
+It cannot decide:
+
+```text
+"Therefore this is fraud."
+```
+
+The decision remains deterministic.
+
+---
+
+# Safety by construction
+
+There is deliberately **no enforcement path**.
+
+```text
+POST /api/enforce
+```
+
+exists so that the system can refuse it.
+
+Example:
 
 ```json
 {
   "error": {
     "code": "ENFORCEMENT_REFUSED",
-    "message": "This system detects and explains coordinated return patterns for a
-      human to investigate. It does not block accounts, deny refunds, suspend
-      customers… the false-positive case here is a real household penalised for
-      living together."
+    "message": "This system detects and explains coordinated return patterns for a human to investigate."
   }
 }
 ```
 
-`SENTINEL_MODE` accepts only `DETECT_ONLY` and `TEST_MODE`. The parser refuses
-`BLOCK`, `ENFORCE`, `AUTO_BLOCK`, `SUSPEND`, `LIVE`, `PRODUCTION` and `PROD` **by
-name**, and the process will not start. A misconfigured deployment fails to boot
-rather than quietly acting against customers on the strength of a graph score.
-
-`POST /api/explain` refuses evasion requests — how to avoid detection, break
-linkage, run multiple accounts undetected, or make activity look legitimate —
-while allowing the product's own core question, "why was this cluster flagged?"
-
----
-
-## Data
-
-4,635 entities · 1,275 accounts · 11,073 orders · 3,543 returns · 6,307 inferred
-links · 120 labelled groups, deterministic from `SEED=20260301`.
-
-**Splits are ring-level**, never row-level. Splitting individual accounts would
-put members of the same ring in train and held-out simultaneously, and a detector
-that memorised one member's device would score on the other. A test asserts every
-ring is wholly within one split.
-
-**Difficulty is class convergence.** At `ADVERSARIAL` a ring's behaviour is
-interpolated 88% of the way toward an ordinary household's, and a household's 60%
-toward a ring's. An earlier version scaled both classes in the same direction,
-which moved the absolute numbers a long way and left the *gap* untouched — see
-the failure diary.
-
-400 background accounts have their own device, address and card, so they form no
-cluster at all. About 8% are solo high-returners: individually suspicious,
-structurally isolated, and correctly reported as an account-level signal rather
-than a ring.
-
----
-
-## Demo scenarios
-
-`npm run demo` — 6/6 behaved as specified. Each is a gate, not a slideshow.
-
-| Scenario | Risk | Verdict | Baseline says |
-|---|---|---|---|
-| Clear ring | 97.5 (struct 32.6 / behav 65.0) | COORDINATION_LIKELY | flags 8/8 |
-| Borderline cluster | 63.5 | COORDINATION_POSSIBLE | flags 0/5 |
-| **Legitimate household** | **54.3** (struct 30.7 / behav 23.6) | **not flagged** | flags 0/4 |
-| **Isolated high returner** | 60.8 (struct 0 / behav 60.8) | **INSUFFICIENT_DATA** | **flags 1/1** |
-| Sparse data | 28.0 | INSUFFICIENT_DATA | flags 0/3 |
-| Prompt injection | 97.5 — *unchanged* | COORDINATION_LIKELY | flags 8/8 |
-
-The fourth row is the one worth dwelling on. One account returning 80% of its
-orders with no linkage to anyone: the account baseline flags it, the graph reports
-no coordination. **Both are correct** — they answer different questions, and a
-coordination detector declining to invent a ring around a single account is
-exactly the behaviour it should have.
-
-The sixth: the injected instruction asked for a zero score and no review. The
-score is byte-identical to the clean run and the review reason switched to
-`UNTRUSTED_CONTENT_FLAGGED`.
-
----
-
-## Architecture
-
-Modular monolith. PostgreSQL is the system of record for the graph; clustering
-runs in memory. No graph database, no Kafka, no blockchain, no vector store —
-nothing in this problem needs them.
+The allowed modes are:
 
 ```text
-┌─────────────────────────────────────────────────┐
-│               NEXT.JS CONSOLE                   │
-│  Overview · Clusters · Graph · Review · Eval    │
-│  Signals · Failures · Audit · Settings          │
-└──────────────────────┬──────────────────────────┘
-                       ▼
-┌─────────────────────────────────────────────────┐
-│  graph/     detection/   scoring/   reviews/    │
-│  audit/     evaluation/  safety/    model/      │
-└──────────┬──────────────────────┬───────────────┘
-           ▼                      ▼
-   ┌──────────────┐      ┌──────────────────┐
-   │ PostgreSQL   │      │ Explanation model│
-   │ + Drizzle    │      │ (optional, prose)│
-   └──────────────┘      └──────────────────┘
+DETECT_ONLY
+TEST_MODE
 ```
 
-Full detail in [`docs/architecture.md`](docs/architecture.md).
-
----
-
-## Limitations
-
-- **The held-out F1 is 1.0, and that is a corpus property.** See above. The
-  feature set separates these two synthetic classes cleanly; nothing here
-  demonstrates it would separate real ones.
-- **Coordination recovery is 0/0 on this split.** The recall half of the thesis
-  is not demonstrated. The precision half is.
-- **The corpus is synthetic.** Real return-abuse data has structure this generator
-  does not model: seasonality, category-specific return norms, marketplace
-  sellers, genuine logistics failures that look like abuse.
-- **Population baselines describe this corpus.** The return-rate thresholds that
-  define "unusually high" would need re-deriving from real data. A threshold
-  calibrated to the wrong population is how a detector starts flagging ordinary
-  customers.
-- **The account baseline is a threshold rule, not a trained model.** A
-  gradient-boosted account-level classifier would likely beat it, and would be a
-  harder comparator.
-- **Louvain stability is measured over 3 rotations**, which is enough to catch
-  gross instability and not enough to be a proper bootstrap.
-- **Injection detection is regex-based**, defence in depth behind structural
-  controls rather than a boundary in itself.
-- **There is no per-merchant access control.** Every cluster is visible to every
-  caller. A graph of who is connected to whom is exactly the artefact that should
-  not be readable by anyone who finds the URL.
-- **On Vercel the database runs in memory** and reseeds on each cold start, so
-  reviewer decisions do not survive an idle period. `DATABASE_URL=postgres://…`
-  fixes this; it is a deployment-tier property, not a design one.
-
----
-
-## Documentation
-
-- [`docs/architecture.md`](docs/architecture.md) — flow, data model, boundaries
-- [`docs/threat-model.md`](docs/threat-model.md) — threats, mitigations and their limits
-- [`docs/design-decisions.md`](docs/design-decisions.md) — decisions and rejected alternatives
-- [`docs/failure-diary.md`](docs/failure-diary.md) — what actually broke
-- [`docs/panel-defense.md`](docs/panel-defense.md) — hard questions, answered from the code
-
----
-
-## The boundary, restated
+The configuration parser rejects dangerous modes by name, including:
 
 ```text
-The system does not decide that anyone committed fraud.
-
-It builds the graph from observations,
-marks its own inferences as inferences,
-scores clusters against a published weight table,
-refuses to score structure alone,
-shows the legitimate explanations beside the suspicious reading,
-and hands the whole thing to a person.
-
-It is a recommendation to look.
-Nothing here takes an action against a customer.
+BLOCK
+ENFORCE
+AUTO_BLOCK
+SUSPEND
+LIVE
+PRODUCTION
+PROD
 ```
+
+A misconfigured deployment therefore fails closed instead of silently gaining enforcement capability.
+
+---
+
+# Evasion resistance
+
+The explanation endpoint also refuses requests asking how to:
+
+* avoid detection
+* break account linkage
+* operate multiple accounts undetected
+* make abusive behaviour appear legitimate
+
+It still answers the legitimate investigative question:
+
+```text
+Why was this cluster flagged?
+```
+
+---
+
+# Demo scenarios
+
+`npm run demo` executes **6/6 scenarios** as behavioural gates.
+
+| Scenario                 |     Risk | Verdict                 | Expected behaviour |
+| ------------------------ | -------: | ----------------------- | ------------------ |
+| Clear ring               |     97.5 | `COORDINATION_LIKELY`   | Flags 8/8          |
+| Borderline cluster       |     63.5 | `COORDINATION_POSSIBLE` | Flags 0/5          |
+| **Legitimate household** | **54.3** | **Not flagged**         | **Flags 0/4**      |
+| Isolated high returner   |     60.8 | `INSUFFICIENT_DATA`     | Flags 1/1          |
+| Sparse data              |     28.0 | `INSUFFICIENT_DATA`     | Flags 0/3          |
+| Prompt injection         |     97.5 | `COORDINATION_LIKELY`   | Flags 8/8          |
+
+The isolated high-returner case is particularly important.
+
+One account returning 80% of its orders with no meaningful linkage can be suspicious at the **account level**.
+
+But it is not a coordinated ring.
+
+The two systems therefore produce different answers because they answer different questions.
+
+---
+
+# Prompt injection test
+
+The demo also tests an injected instruction asking the system to:
+
+```text
+zero the score
++
+avoid review
+```
+
+The clean and injected runs produce a **byte-identical risk score**.
+
+The review reason instead becomes:
+
+```text
+UNTRUSTED_CONTENT_FLAGGED
+```
+
+The model therefore cannot rewrite the deterministic decision path through malicious content.
+
+---
+
+# Dataset
+
+The deterministic corpus contains:
+
+```text
+4,635 entities
+1,275 accounts
+11,073 orders
+3,543 returns
+6,307 inferred links
+120 labelled groups
+```
+
+Seed:
+
+```text
+SEED=20260301
+```
+
+The data is synthetic.
+
+### Ring-level splitting
+
+Train/dev/held-out splits are performed at the **ring level**, never by individual rows.
+
+Otherwise:
+
+```text
+Ring member A → training
+Ring member B → held-out
+```
+
+could leak shared infrastructure between the splits.
+
+A test asserts that each ring remains wholly within one split.
+
+### Adversarial convergence
+
+At `ADVERSARIAL` difficulty:
+
+```text
+Ring behaviour      → 88% toward household behaviour
+Household behaviour → 60% toward ring behaviour
+```
+
+This intentionally moves the classes closer together.
+
+---
+
+# Verified
+
+The project was verified from a clean environment.
+
+| Check               | Result                  |
+| ------------------- | ----------------------- |
+| TypeScript          | **Clean**               |
+| ESLint              | **Clean**               |
+| Tests               | **87 passing**          |
+| Build               | **26 routes**           |
+| Demo                | **6/6 scenarios**       |
+| Console             | **10 pages / HTTP 200** |
+| Enforcement refusal | **Exercised**           |
+| Evasion refusal     | **Exercised**           |
+| Cluster subgraph    | **Exercised**           |
+
+---
+
+# Architecture
+
+The application is a modular monolith.
+
+PostgreSQL is the system of record.
+
+Clustering runs in memory.
+
+There is intentionally no:
+
+* graph database
+* Kafka
+* blockchain
+* vector database
+
+because none is required for the problem.
+
+```mermaid
+flowchart TB
+
+    A[Commerce Events] --> B[Ingestion]
+
+    B --> C[Exact Entity Resolution]
+
+    C --> D[(PostgreSQL + Drizzle)]
+
+    C --> E[Entity Graph Builder]
+
+    E --> F[Fanout Guard]
+
+    F --> G[Clustering]
+
+    G --> G1[Shared-Entity Components]
+    G --> G2[Louvain + Stability]
+
+    G1 --> H[Feature Computation]
+    G2 --> H
+
+    H --> I[Risk Scoring]
+    H --> J[Confidence Scoring]
+
+    I --> K[Counter-Signals]
+    J --> K
+
+    K --> L{Decision}
+
+    L -->|High risk + sufficient confidence| M[Human Review]
+    L -->|Low confidence| M
+    L -->|Insufficient evidence| N[INSUFFICIENT_DATA]
+    L -->|Benign structure| O[Not Flagged]
+
+    H --> P[Deterministic Explanation]
+
+    P --> Q{Optional LLM}
+
+    Q -->|Validated prose| R[Explanation]
+    Q -->|Invalid signal / verdict language| S[Discard]
+
+    M --> T[Audit Trail]
+    N --> T
+    O --> T
+    R --> T
+
+    T --> U[Console]
+
+    V[Safety Boundary] -.-> L
+    V -.-> W[No Enforcement Path]
+
+    X[Held-Out Evaluation] --> I
+```
+
+Detailed architecture documentation:
+
+```text
+docs/architecture.md
+```
+
+---
+
+# Console
+
+The Next.js console exposes:
+
+```text
+Overview
+Clusters
+Cluster Graph
+Review Queue
+Evaluation
+Signals
+Failures
+Audit
+Settings
+```
+
+The interface is designed around the investigator's workflow:
+
+```text
+DISCOVER
+   ↓
+UNDERSTAND
+   ↓
+TRACE
+   ↓
+REVIEW
+   ↓
+AUDIT
+```
+
+The graph view makes observed and inferred relationships visually distinct so that an analyst never has to guess which part of the graph is measured versus derived.
+
+---
+
+# Quickstart
+
+```bash
+npm install
+
+cp .env.example .env
+
+npm run db:migrate
+npm run db:seed
+
+npm run detect
+npm run demo
+npm run evaluate
+
+npm run dev
+```
+
+The local console runs at:
+
+```text
+http://localhost:3000
+```
+
+The default database uses PGlite, so no external database server is required for the standard development flow.
+
+---
+
+# Repository structure
+
+```text
+.
+├── app/
+│   └── (console)/
+│       ├── audit/
+│       ├── clusters/
+│       ├── demo/
+│       ├── evaluation/
+│       ├── failures/
+│       ├── overview/
+│       ├── settings/
+│       └── signals/
+│
+├── src/
+│   ├── graph/
+│   ├── detection/
+│   ├── scoring/
+│   ├── reviews/
+│   ├── audit/
+│   ├── evaluation/
+│   ├── safety/
+│   └── model/
+│
+├── tests/
+│
+├── docs/
+│   ├── architecture.md
+│   ├── threat-model.md
+│   ├── design-decisions.md
+│   ├── failure-diary.md
+│   └── panel-defense.md
+│
+├── db/
+│   └── migrations/
+│
+├── scripts/
+│
+└── types/
+```
+
+---
+
+# Documentation
+
+The repository includes dedicated engineering documentation:
+
+| Document                   | Purpose                                    |
+| -------------------------- | ------------------------------------------ |
+| `docs/architecture.md`     | System flow, data model and boundaries     |
+| `docs/threat-model.md`     | Threats, mitigations and limitations       |
+| `docs/design-decisions.md` | Design decisions and rejected alternatives |
+| `docs/failure-diary.md`    | What actually broke during development     |
+| `docs/panel-defense.md`    | Hard evaluation questions and answers      |
+
+---
+
+# Contributors
+
+* **KenidoesCode**
+
+---
+
+# Limitations
+
+This project deliberately documents where the evidence stops.
+
+### Synthetic evaluation
+
+The corpus is synthetic.
+
+Real return-abuse data may contain:
+
+* seasonality
+* category-specific return norms
+* marketplace-specific behaviour
+* seller effects
+* genuine logistics failures
+* other correlations not represented here
+
+### Perfect F1
+
+The held-out F1 of `1.0` is a property of this corpus.
+
+It is not a production capability estimate.
+
+### Coordination recovery
+
+The account baseline detected all 12 suspicious rings in this particular held-out split.
+
+Therefore:
+
+```text
+Baseline missed: 0
+Graph recovered: 0
+
+Recovery: 0/0
+```
+
+There was simply nothing for the graph to recover.
+
+This means the **recall-improvement half of the thesis is not demonstrated by this split**.
+
+The demonstrated result is the precision side:
+
+> **The graph detector avoided the five benign household false positives produced by the account baseline.**
+
+### Baseline strength
+
+The account baseline is a threshold rule rather than a trained classifier.
+
+A stronger learned account-level model could be a harder comparator.
+
+### Louvain stability
+
+Stability is currently measured over three node-order rotations.
+
+That catches gross instability but is not a full bootstrap analysis.
+
+### Injection detection
+
+Injection detection is regex-based and is intended as defence-in-depth.
+
+The primary protection comes from keeping the model outside the deterministic decision boundary.
+
+### Access control
+
+The current build does not implement per-merchant authorization.
+
+A production deployment would need strict access controls around graph data and investigation results.
+
+### Deployment persistence
+
+On Vercel, the default in-memory database reseeds on cold start.
+
+For persistent reviewer decisions:
+
+```text
+DATABASE_URL=postgres://...
+```
+
+should point to a persistent PostgreSQL instance.
+
+---
+
+# Design principles
+
+The project is built around a few non-negotiable rules.
+
+### 1. Relationships matter
+
+Some fraud patterns are invisible at account level.
+
+### 2. Shared infrastructure is not guilt
+
+A shared address is evidence of proximity, not evidence of abuse.
+
+### 3. Inferences must remain inferences
+
+Derived relationships are explicitly labelled and traceable.
+
+### 4. Risk and confidence are different
+
+A strong signal can still have weak evidential support.
+
+### 5. Uncertainty is a valid result
+
+`INSUFFICIENT_DATA` is safer than fabricated certainty.
+
+### 6. AI explains; deterministic code decides
+
+The model never owns the risk boundary.
+
+### 7. Safety should be architectural
+
+If the system cannot enforce a decision, it cannot accidentally enforce one.
+
+### 8. Evaluation must include hard negatives
+
+A detector that only sees obvious fraud has not demonstrated that it can distinguish fraud from normal behaviour.
+
+---
+
+# The core thesis
+
+Most return-abuse systems ask:
+
+> **Does this account return too much?**
+
+This system asks a different question:
+
+> **Do individually ordinary accounts form a coordinated behavioural pattern — and is that pattern distinguishable from legitimate shared infrastructure?**
+
+That difference is the entire point.
+
+```text
+INDIVIDUAL SIGNALS
+       ↓
+    often normal
+       ↓
+RELATIONSHIPS
+       ↓
+  reveal coordination
+       ↓
+BEHAVIOURAL EVIDENCE
+       ↓
+ separate abuse from households
+       ↓
+RISK + CONFIDENCE
+       ↓
+ HUMAN INVESTIGATION
+       ↓
+AUDITABLE DECISION
+```
+
+**Find the ring.**
+**Don't invent the ring.**
+**And never mistake a household for one.**
